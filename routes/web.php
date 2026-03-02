@@ -2,7 +2,8 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\TarefaController; // Importe o novo Controller
+use App\Http\Controllers\TarefaController; 
+use App\Http\Controllers\TreinamentoController; 
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,9 +26,11 @@ Route::prefix('gestor')->group(function () {
     Route::post('/tarefas', [TarefaController::class, 'store'])->name('tarefas.store');
     Route::put('/tarefas/{id}', [TarefaController::class, 'update'])->name('tarefas.update');
     Route::delete('/tarefas/{id}', [TarefaController::class, 'destroy'])->name('tarefas.destroy');
-    // Route::get('/tarefas/{id}/edit', [TarefaController::class, 'edit'])->name('tarefas.edit');
-    // Route::put('/tarefas/{id}', [TarefaController::class, 'update'])->name('tarefas.update');
-    // Route::delete('/tarefas/{id}', [TarefaController::class, 'destroy'])->name('tarefas.destroy');
+    // Rotas de Treinamentos
+    Route::get('/treinamentos', [TreinamentoController::class, 'index'])->name('treinamentos.index');
+    Route::post('/treinamentos', [TreinamentoController::class, 'store'])->name('treinamentos.store');
+    Route::put('/treinamentos/{id}', [TreinamentoController::class, 'update'])->name('treinamentos.update');
+    Route::delete('/treinamentos/{id}', [TreinamentoController::class, 'destroy'])->name('treinamentos.destroy');
 });
 
 Route::post('/logout', function () {

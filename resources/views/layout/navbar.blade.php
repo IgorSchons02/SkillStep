@@ -20,7 +20,7 @@
             {{-- Menu Visível apenas para Gestores --}}
             @if(session('codigo_tipo') == 1)
                 <li>
-                    <a href="#">
+                    <a href="{{ route('treinamentos.index') }}">
                         <i class="bi bi-journal-check"></i>
                         <span>Treinamentos</span>
                     </a>

@@ -30,4 +30,14 @@ class Tarefa extends Model
         // Relaciona a tarefa com a área através da FK 'codigo_area'
         return $this->belongsTo(Area::class, 'codigo_area', 'id');
     }
+    /**
+     * Relacionamento N:N com Treinamentos.
+     * Uma tarefa pode estar presente em vários treinamentos.
+     */
+    public function treinamentos()
+    {
+        return $this->belongsToMany(Treinamento::class, 'treinamento_tarefas', 'codigo_tarefa', 'codigo_treinamento')
+                    ->withPivot('id', 'ordem')
+                    ->withTimestamps();
+    }
 }
