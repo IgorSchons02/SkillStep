@@ -31,6 +31,11 @@ Route::prefix('gestor')->group(function () {
     Route::post('/treinamentos', [TreinamentoController::class, 'store'])->name('treinamentos.store');
     Route::put('/treinamentos/{id}', [TreinamentoController::class, 'update'])->name('treinamentos.update');
     Route::delete('/treinamentos/{id}', [TreinamentoController::class, 'destroy'])->name('treinamentos.destroy');
+    // Rotas de Usuários   
+    Route::get('/usuarios', [App\Http\Controllers\UsuarioController::class, 'index'])->name('usuarios.index');
+    Route::post('/usuarios', [App\Http\Controllers\UsuarioController::class, 'store'])->name('usuarios.store');
+    Route::put('/usuarios/{id}', [App\Http\Controllers\UsuarioController::class, 'update'])->name('usuarios.update');
+    Route::delete('/usuarios/{id}', [App\Http\Controllers\UsuarioController::class, 'destroy'])->name('usuarios.destroy');
 });
 
 Route::post('/logout', function () {

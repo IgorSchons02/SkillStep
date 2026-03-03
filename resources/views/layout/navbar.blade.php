@@ -32,7 +32,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="{{ route('usuarios.index') }}">
                         <i class="bi bi-people"></i>
                         <span>Usuários</span>
                     </a>

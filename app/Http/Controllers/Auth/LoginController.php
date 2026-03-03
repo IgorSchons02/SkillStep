@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -26,22 +27,20 @@ class LoginController extends Controller
         $senha = $request->input('senha');
 
         // 2. Realiza o select direto no banco de dados
-        $usuario = Usuario::where('email', $email)
-                          ->where('senha', $senha)
-                          ->first();
+        $usuario = Usuario::where('email', $email)->first();
 
         // 3. Verifica se o usuário foi encontrado
-        if ($usuario) {
+        if ($usuario && Hash::check($senha, $usuario->senha)) {
             // Armazena os dados na sessão (ajustado para o seu ER)
             session([
-                'usuario_id'   => $usuario->id,
+                'usuario_id' => $usuario->id,
                 'usuario_nome' => $usuario->nome,
-                'codigo_tipo'  => $usuario->codigo_tipo, // 1 ou 2
-                'codigo_area'  => $usuario->codigo_area,
+                'codigo_tipo' => $usuario->codigo_tipo, // 1 ou 2
+                'codigo_area' => $usuario->codigo_area,
             ]);
 
             // Redireciona conforme o tipo de usuário
-            if ($usuario->codigo_tipo == 1) {
+            if ($usuario->codigo_tipo == 1 || $usuario->codigo_tipo == 3) {
                 return redirect()->route('homeGestor')->with('success', 'Bem-vindo, Gestor!');
             } else {
                 return redirect()->route('homeColaborador')->with('success', 'Bem-vindo ao seu treinamento!');

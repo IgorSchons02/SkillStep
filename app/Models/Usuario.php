@@ -2,27 +2,42 @@
 
 namespace App\Models;
 
-// Importamos o Authenticatable para que este modelo funcione com o sistema de login
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Usuario extends Authenticatable
 {
+    use HasFactory, Notifiable;
+
     protected $table = 'usuarios';
 
     protected $fillable = [
         'nome',
         'email',
         'senha',
-        'codigo_tipo', // 1 para gestor, 2 para colaborador
+        'codigo_tipo', 
         'codigo_area'
     ];
 
-    // O Laravel espera que a coluna de senha se chame 'password'. 
-    // Como você usa 'senha', precisamos sobrescrever este método para o login funcionar.
+    // Trava de segurança para não vazar a senha em retornos JSON
+    protected $hidden = [
+        'senha',
+    ];
+
+    // Informa ao Laravel qual é a coluna de senha no momento do Login
     public function getAuthPassword()
     {
         return $this->senha;
+    }
+
+    /**
+     * Relacionamento: O usuário tem um Tipo (Gestor, Colaborador, etc).
+     */
+    public function tipo(): BelongsTo
+    {
+        return $this->belongsTo(TipoUsuario::class, 'codigo_tipo', 'id');
     }
 
     /**
@@ -47,5 +62,13 @@ class Usuario extends Authenticatable
     public function isColaborador(): bool
     {
         return $this->codigo_tipo == 2;
+    }
+    
+    /**
+     * Helper para verificar se é Admin (Código 3)
+     */
+    public function isAdmin(): bool
+    {
+        return $this->codigo_tipo == 3;
     }
 }
