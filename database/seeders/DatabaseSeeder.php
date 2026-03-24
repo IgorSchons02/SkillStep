@@ -60,6 +60,16 @@ class DatabaseSeeder extends Seeder
                 'codigo_area' => 1, // Atrelado a Desenvolvimento
                 'created_at' => now(),
                 'updated_at' => now(),
+            ],
+                        [
+                'id' => 3,
+                'nome' => 'Admin',
+                'email' => 'admin@abase',
+                'senha' => \Illuminate\Support\Facades\Hash::make('123'),
+                'codigo_tipo' => 3, // Administrador do sistema
+                'codigo_area' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]
         ]);
     }

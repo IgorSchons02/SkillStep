@@ -33,7 +33,7 @@
             <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
                 <i class="bi bi-exclamation-octagon-fill me-2"></i> <strong>Atenção!</strong> Não foi possível salvar:
                 <ul class="mb-0 mt-2">
-                    @foreach($errors->all() as $error)
+                    @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
@@ -56,7 +56,7 @@
                         <div class="col-md-4">
                             <select name="area" class="form-select bg-light border-0">
                                 <option value="">Todas as Áreas</option>
-                                @foreach($areas as $area)
+                                @foreach ($areas as $area)
                                     <option value="{{ $area->id }}" {{ request('area') == $area->id ? 'selected' : '' }}>
                                         {{ $area->name }}
                                     </option>
@@ -87,7 +87,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($usuarios as $usuario)
+                            @forelse ($usuarios as $usuario)
                                 <tr>
                                     <td class="ps-4">
                                         <div class="d-flex align-items-center">
@@ -202,7 +202,7 @@
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="codigo_tipo" name="codigo_tipo" required>
                                     <option value="">Selecione...</option>
-                                    @foreach($tipos as $tipo)
+                                    @foreach ($tipos as $tipo)
                                         <option value="{{ $tipo->id }}">{{ ucfirst($tipo->descricao) }}</option>
                                     @endforeach
                                 </select>
@@ -214,7 +214,7 @@
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="codigo_area" name="codigo_area">
                                     <option value="">Selecione a área...</option>
-                                    @foreach($areas as $area)
+                                    @foreach ($areas as $area)
                                         <option value="{{ $area->id }}">{{ $area->name }}</option>
                                     @endforeach
                                 </select>
@@ -277,7 +277,7 @@
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="edit_codigo_tipo" name="codigo_tipo" required>
                                     <option value="">Selecione...</option>
-                                    @foreach($tipos as $tipo)
+                                    @foreach ($tipos as $tipo)
                                         <option value="{{ $tipo->id }}">{{ ucfirst($tipo->descricao) }}</option>
                                     @endforeach
                                 </select>
@@ -289,7 +289,7 @@
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="edit_codigo_area" name="codigo_area">
                                     <option value="">Selecione a área...</option>
-                                    @foreach($areas as $area)
+                                    @foreach ($areas as $area)
                                         <option value="{{ $area->id }}">{{ $area->name }}</option>
                                     @endforeach
                                 </select>
