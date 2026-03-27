@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Usuario;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,61 +16,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // 1. Criando o Administrador do Sistema
+        Usuario::create([
+            'nome' => 'Admin SkillStep',
+            'cpf' => '04106731900',
+            'email' => 'admin@cigam.com.br',
+            'senha' => Hash::make('123'),
+            'tipo_usuario' => 'admin',
         ]);
 
-        DB::table('tipo_usuarios')->insert([
-            ['id' => 1, 'descricao' => 'gestor', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 2, 'descricao' => 'colaborador', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 3, 'descricao' => 'administrador do sistema', 'created_at' => now(), 'updated_at' => now()],
+        // 2. Criando um Supervisor (Antigo Gestor)
+        Usuario::create([
+            'nome' => 'Cristiano Supervisor',
+            'cpf' => '12345678900',
+            'email' => 'cristiano@cigam.com.br',
+            'senha' => Hash::make('123'),
+            'tipo_usuario' => 'supervisor',
         ]);
 
-        DB::table('areas')->insert([
-            [
-                'id' => 1,
-                'name' => 'Desenvolvimento',
-                'slug' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
+        // 3. Criando um Aluno (Você)
+        Usuario::create([
+            'nome' => 'Igor Schons',
+            'cpf' => '98765432100',
+            'email' => 'igor@cigam.com.br',
+            'senha' => Hash::make('123'),
+            'tipo_usuario' => 'aluno',
         ]);
-
-        // 2. Populando a tabela de Usuários
-        DB::table('usuarios')->insert([
-            [
-                'id' => 1,
-                'nome' => 'igor',
-                'email' => 'igor.schons',
-                'senha' => \Illuminate\Support\Facades\Hash::make('123'),
-                'codigo_tipo' => 2, // Colaborador
-                'codigo_area' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 2,
-                'nome' => 'Dalton',
-                'email' => 'dalton@abase',
-                'senha' => \Illuminate\Support\Facades\Hash::make('123'),
-                'codigo_tipo' => 1, // Gestor
-                'codigo_area' => 1, // Atrelado a Desenvolvimento
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-                        [
-                'id' => 3,
-                'nome' => 'Admin',
-                'email' => 'admin@abase',
-                'senha' => \Illuminate\Support\Facades\Hash::make('123'),
-                'codigo_tipo' => 3, // Administrador do sistema
-                'codigo_area' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        ]);
+        
+        // Exemplo de criação em massa caso queira testar a listagem
+        // Usuario::factory(10)->create(['tipo_usuario' => 'aluno']);
     }
 }

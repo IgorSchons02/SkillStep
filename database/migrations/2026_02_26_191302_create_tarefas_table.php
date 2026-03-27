@@ -12,21 +12,33 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tarefas', function (Blueprint $table) {
-            // Define 'id' como chave primária autoincremento (seu novo padrão)
             $table->id(); 
             
-            $table->string('titulo');
-            $table->text('descricao')->nullable(); // Text permite descrições longas
+            $table->string('titulo', 200);
+            $table->text('descricao');
             
-            // Relacionamento com a tabela de áreas
-            $table->unsignedBigInteger('codigo_area');
-            $table->foreign('codigo_area')->references('id')->on('areas')->onDelete('cascade');
+            /**
+             * Relacionamento com a nova tabela de Categorias.
+             * Usamos 'restrict' para não permitir deletar uma categoria que tenha tarefas.
+             */
+            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('restrict');
             
-            // O Laravel já gerencia datas de criação com o timestamps()
-            // Mas incluímos conforme sua solicitação de 'data_criacao'
-            $table->date('data_criacao')->useCurrent(); 
+            /**
+             * Tempo estimado armazenado em MINUTOS (INT).
+             * Onde 1.5h no front será 90 no banco.
+             */
+            $table->integer('tempo_estimado');
             
+            /**
+             * Status da tarefa (1 = Ativo, 0 = Inativo)
+             */
+            $table->boolean('status')->default(true);
+            
+            /**
+             * Timestamps padrão e SoftDeletes para auditoria
+             */
             $table->timestamps();
+            $table->softDeletes(); 
         });
     }
 

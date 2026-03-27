@@ -4,7 +4,10 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TarefaController; 
 use App\Http\Controllers\TreinamentoController; 
+use App\Http\Controllers\CategoriaController; 
+use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -13,33 +16,36 @@ Route::get('/', function () {
 // Autenticação
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'autenticar'])->name('login.autenticar');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Home / Dashboard
-Route::get('/home', [HomeController::class, 'index'])->name('home');
-Route::get('/gestor/dashboard', [HomeController::class, 'homeGestor'])->name('homeGestor');
-Route::get('/colaborador/treinamento', [HomeController::class, 'homeColaborador'])->name('homeColaborador');
+// Grupos de Rotas Protegidas
+// Grupos de Rotas Protegidas
+Route::middleware(['auth'])->group(function () {
 
-// ── Gestão de Tarefas (Exclusivo Gestor) ──
-// Seguindo seu padrão de nomes e estrutura de pastas
-Route::prefix('gestor')->group(function () {
-    Route::get('/tarefas', [TarefaController::class, 'index'])->name('tarefas.index');
-    Route::post('/tarefas', [TarefaController::class, 'store'])->name('tarefas.store');
-    Route::put('/tarefas/{id}', [TarefaController::class, 'update'])->name('tarefas.update');
-    Route::delete('/tarefas/{id}', [TarefaController::class, 'destroy'])->name('tarefas.destroy');
-    // Rotas de Treinamentos
-    Route::get('/treinamentos', [TreinamentoController::class, 'index'])->name('treinamentos.index');
-    Route::post('/treinamentos', [TreinamentoController::class, 'store'])->name('treinamentos.store');
-    Route::put('/treinamentos/{id}', [TreinamentoController::class, 'update'])->name('treinamentos.update');
-    Route::delete('/treinamentos/{id}', [TreinamentoController::class, 'destroy'])->name('treinamentos.destroy');
-    // Rotas de Usuários   
-    Route::get('/usuarios', [App\Http\Controllers\UsuarioController::class, 'index'])->name('usuarios.index');
-    Route::post('/usuarios', [App\Http\Controllers\UsuarioController::class, 'store'])->name('usuarios.store');
-    Route::put('/usuarios/{id}', [App\Http\Controllers\UsuarioController::class, 'update'])->name('usuarios.update');
-    Route::delete('/usuarios/{id}', [App\Http\Controllers\UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+    // Rota curinga que redireciona conforme o perfil
+    // Quando você acessar /home, o HomeController decide para onde você vai
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+    // ── ÁREA DO ADMIN ──
+    Route::prefix('admin')->group(function () {
+        // A URL final será: /admin/dashboard
+        Route::get('/dashboard', [HomeController::class, 'homeAdmin'])->name('homeAdmin');
+        
+        Route::resource('tarefas', TarefaController::class);
+        Route::resource('treinamentos', TreinamentoController::class);
+        Route::resource('usuarios', UsuarioController::class);
+        Route::resource('categorias', CategoriaController::class);
+    });
+
+    // ── ÁREA DO SUPERVISOR ──
+    Route::prefix('supervisor')->group(function () {
+        // A URL final será: /supervisor/dashboard
+        Route::get('/dashboard', [HomeController::class, 'homeSupervisor'])->name('homeSupervisor');
+    });
+
+    // ── ÁREA DO ALUNO ──
+    Route::prefix('aluno')->group(function () {
+        // A URL final será: /aluno/dashboard
+        Route::get('/dashboard', [HomeController::class, 'homeAluno'])->name('homeAluno');
+    });
 });
-
-Route::post('/logout', function () {
-    Auth::logout();
-    session()->flush(); // Limpa a sessão manual que você criou
-    return redirect('/login');
-})->name('logout');

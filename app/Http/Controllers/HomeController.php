@@ -3,44 +3,53 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
     /**
-     * Gerencia a página inicial após o login.
+     * Ponto de entrada único que redireciona conforme o perfil
      */
     public function index()
     {
-        // Verifica se existe um usuário na sessão
-        if (!session()->has('usuario_id')) {
-            return redirect()->route('login');
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            return redirect()->route('homeAdmin');
         }
 
-        $tipo = session('codigo_tipo');
-
-        // Redireciona para o método específico conforme o tipo
-        if ($tipo == 1) {
-            return $this->homeGestor();
+        if ($user->isSupervisor()) {
+            return redirect()->route('homeSupervisor');
         }
 
-        return $this->homeColaborador();
+        return redirect()->route('homeAluno');
     }
 
     /**
-     * Visão do Gestor (Tipo 1)
+     * Dashboard do Administrador
+     * Pasta: resources/views/admin/home.blade.php
      */
-    public function homeGestor()
+    public function homeAdmin()
     {
-        // Aqui você buscaria as estatísticas de onboarding no futuro
-        return view('homeGestor');
+        return view('admin.home');
     }
 
     /**
-     * Visão do Colaborador (Tipo 2)
+     * Dashboard do Supervisor
+     * Pasta: resources/views/supervisor/home.blade.php
      */
-    public function homeColaborador()
+    public function homeSupervisor()
     {
-        // Aqui você buscaria as tarefas específicas do funcionário
-        return view('home'); 
+        return view('supervisor.home');
+    }
+
+    /**
+     * Dashboard do Aluno
+     * Pasta: resources/views/aluno/home.blade.php
+     */
+    public function homeAluno()
+    {
+        // Aqui você pode buscar o plano de estudos do aluno logado futuramente
+        return view('aluno.home');
     }
 }

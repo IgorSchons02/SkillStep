@@ -3,178 +3,140 @@
 namespace App\Http\Controllers;
 
 use App\Models\Usuario;
-use App\Models\Area;
-use App\Models\TipoUsuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UsuarioController extends Controller
 {
-    /**
-     * Lista os usuários com filtros, ordenação e regra de tenant.
-     */
-public function index(Request $request)
+    public function index(Request $request)
     {
-        // 1. Pegamos quem está logado logo no início
-        $tipoUsuarioLogado = session('codigo_tipo');
+        $usuarioLogado = auth()->user();
+        $query = Usuario::query();
 
-        // Traz as relações para evitar o problema de N+1 queries no banco
-        $query = Usuario::with(['area', 'tipo']);
-
-        // --- NOVO: Trava de Visibilidade ---
-        // Se o usuário logado NÃO for Admin (3), esconde os Admins da listagem principal
-        if ($tipoUsuarioLogado != 3) {
-            $query->where('codigo_tipo', '!=', 3);
+        // Regra de Visibilidade: Supervisores não vêem Admins
+        if (!$usuarioLogado->isAdmin()) {
+            $query->where('tipo_usuario', '!=', 'admin');
         }
 
-        // Filtro de Pesquisa (Texto no Nome ou E-mail)
+        // Filtro de Pesquisa (Nome, E-mail ou CPF)
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('nome', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $search = $request->search;
+                $q->where('nome', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('cpf', 'like', "%{$search}%");
             });
         }
 
-        // Filtro de Área via formulário da tela
-        if ($request->filled('area')) {
-            if ($request->area === 'sem_area') {
-                // Traz apenas os colaboradores globais (sem área)
-                $query->whereNull('codigo_area');
-            } else {
-                $query->where('codigo_area', $request->area);
-            }
+        // Filtro por Tipo (admin, supervisor, aluno)
+        if ($request->filled('tipo')) {
+            $query->where('tipo_usuario', $request->tipo);
         }
 
-        // Como a trava foi removida, todos precisam ver o combo de áreas para conseguir filtrar
-        $areas = Area::orderBy('name')->get();
-
-        // Ordenação padrão: mais recentes primeiro
         $usuarios = $query->latest()->paginate(10);
 
-        // --- Filtro de Tipos de Usuário para o Modal de Criação ---
-        if ($tipoUsuarioLogado == 3) {
-            // Se for Admin (3), pode ver e criar qualquer tipo de usuário
-            $tipos = TipoUsuario::all();
-        } else {
-            // Se for Gestor (1), só pode criar Gestores (1) ou Colaboradores (2)
-            $tipos = TipoUsuario::whereIn('id', [1, 2])->get();
-        }
+        $tipos = [
+            (object) ['id' => 'admin', 'descricao' => 'Administrador'],
+            (object) ['id' => 'supervisor', 'descricao' => 'Supervisor'],
+            (object) ['id' => 'aluno', 'descricao' => 'Aluno'],
+        ];
 
-        return view('gestor.usuarios.index', compact('usuarios', 'areas', 'tipos'));
+        return view('admin.usuarios.index', compact('usuarios', 'tipos'));
     }
 
-    /**
-     * Salva um novo usuário no banco de dados.
-     */
     public function store(Request $request)
     {
-        // 1. Validação dos dados
+        // 1. Limpa o CPF (deixa só números)
+        $cpfLimpo = preg_replace('/[^0-9]/', '', $request->cpf);
+
+        // 2. Validação Manual Inicial (Campos obrigatórios, exceto a regra de unique do CPF por enquanto)
         $request->validate([
             'nome' => 'required|string|max:255',
-            'email' => 'required|email|unique:usuarios,email|max:255',
-            'senha' => 'required|string|min:6', // Mínimo de 6 caracteres para a senha
-            'codigo_tipo' => 'required|exists:tipo_usuarios,id',
-            'codigo_area' => 'nullable|exists:areas,id'
-        ], [
-            // Mensagens customizadas (opcional)
-            'email.unique' => 'Este e-mail já está cadastrado no sistema.'
+            'email' => 'required|email',
+            'senha' => 'required|min:6',
+            'tipo_usuario' => 'required|in:admin,supervisor,aluno',
+            'cpf' => 'required', // Apenas checa se preencheu
         ]);
 
-        $tipoUsuarioLogado = session('codigo_tipo');
-        
-        // Se quem está logado NÃO é admin, mas tentou enviar o código 3 (Admin)
-        if ($tipoUsuarioLogado != 3 && $request->codigo_tipo == 3) {
-            return redirect()->back()->with('error', 'Apenas Administradores podem criar novos Administradores.');
-        }
-        // 2. Regra de Negócio: Se não for Gestor (ID 1), forçamos a área a ser nula
-        $codigoArea = $request->codigo_tipo == 1 ? $request->codigo_area : null;
+        // 3. Busca o usuário pelo CPF (mesmo se estiver na lixeira)
+        $usuarioExistente = Usuario::withTrashed()->where('cpf', $cpfLimpo)->first();
 
-        // 3. Criação do usuário criptografando a senha
+        if ($usuarioExistente) {
+            // CASO A: O usuário está na lixeira (Soft Delete) -> RESTAURAR
+            if ($usuarioExistente->trashed()) {
+                $usuarioExistente->restore();
+                $usuarioExistente->update([
+                    'nome' => $request->nome,
+                    'email' => $request->email,
+                    'tipo_usuario' => $request->tipo_usuario,
+                    'senha' => Hash::make($request->senha),
+                ]);
+
+                return redirect()->route('usuarios.index')
+                    ->with('success', 'Usuário reativado com sucesso (CPF recuperado do histórico)!');
+            }
+
+            // CASO B: O usuário está ATIVO -> ERRO DE DUPLICIDADE
+            // Aqui nós simulamos o erro de validação do Laravel manualmente
+            return back()->withErrors(['cpf' => 'Este CPF já está cadastrado para um usuário ativo.'])->withInput();
+        }
+
+        // 4. Se não existe (nem ativo, nem deletado), CRIA NOVO
         Usuario::create([
             'nome' => $request->nome,
+            'cpf' => $cpfLimpo,
             'email' => $request->email,
-            'senha' => \Illuminate\Support\Facades\Hash::make($request->senha),
-            'codigo_tipo' => $request->codigo_tipo,
-            'codigo_area' => $codigoArea,
+            'tipo_usuario' => $request->tipo_usuario,
+            'senha' => Hash::make($request->senha),
         ]);
 
-        // 4. Redirecionamento com mensagem de sucesso
         return redirect()->route('usuarios.index')->with('success', 'Usuário cadastrado com sucesso!');
     }
 
-    /**
-     * Atualiza os dados de um usuário existente.
-     */
     public function update(Request $request, $id)
     {
         $usuario = Usuario::findOrFail($id);
-        $tipoUsuarioLogado = session('codigo_tipo');
+        $cpfLimpo = preg_replace('/[^0-9]/', '', $request->cpf);
 
-        // --- TRAVA DE SEGURANÇA BACKEND ---
-        // 1. Gestor não pode editar um Admin
-        if ($tipoUsuarioLogado != 3 && $usuario->codigo_tipo == 3) {
-            return redirect()->back()->with('error', 'Você não tem permissão para editar um Administrador.');
-        }
-        // 2. Gestor não pode transformar alguém em Admin
-        if ($tipoUsuarioLogado != 3 && $request->codigo_tipo == 3) {
-            return redirect()->back()->with('error', 'Apenas Administradores podem promover outros a Administrador.');
-        }
-
-        // --- VALIDAÇÃO COM EXCEÇÃO DE E-MAIL ---
-        $request->validate([
+        $data = $request->validate([
             'nome' => 'required|string|max:255',
-            // A regra abaixo diz: o e-mail deve ser único na tabela usuarios, EXCETO para a linha com este $id
-            'email' => 'required|email|max:255|unique:usuarios,email,' . $id,
-            'senha' => 'nullable|string|min:6', // Nullable significa que não é obrigatório preencher
-            'codigo_tipo' => 'required|exists:tipo_usuarios,id',
-            'codigo_area' => 'nullable|exists:areas,id'
+            'cpf' => ['required', Rule::unique('usuarios')->ignore($id)],
+            'email' => 'required|email',
+            'tipo_usuario' => 'required|in:admin,supervisor,aluno',
+            'senha' => 'nullable|min:6',
         ]);
 
-        // Regra de Negócio: Se não for Gestor (ID 1), forçamos a área a ser nula
-        $codigoArea = $request->codigo_tipo == 1 ? $request->codigo_area : null;
+        $usuario->nome = $data['nome'];
+        $usuario->email = $data['email'];
+        $usuario->cpf = $cpfLimpo;
+        $usuario->tipo_usuario = $data['tipo_usuario'];
 
-        // Prepara os dados básicos
-        $dadosAtualizacao = [
-            'nome' => $request->nome,
-            'email' => $request->email,
-            'codigo_tipo' => $request->codigo_tipo,
-            'codigo_area' => $codigoArea,
-        ];
-
-        // Se o campo de senha foi preenchido, nós criptografamos e adicionamos aos dados de atualização
         if ($request->filled('senha')) {
-            $dadosAtualizacao['senha'] = \Illuminate\Support\Facades\Hash::make($request->senha);
+            $usuario->senha = Hash::make($request->senha);
         }
 
-        $usuario->update($dadosAtualizacao);
-
+        $usuario->save();
         return redirect()->route('usuarios.index')->with('success', 'Usuário atualizado com sucesso!');
     }
 
-    /**
-     * Exclui um utilizador do sistema.
-     */
     public function destroy($id)
     {
         $usuario = Usuario::findOrFail($id);
-        
-        $usuarioLogadoId = session('usuario_id');
-        $tipoUsuarioLogado = session('codigo_tipo');
 
-        // --- TRAVAS DE SEGURANÇA ---
-        
-        // 1. O utilizador não pode excluir a própria conta
-        if ($usuario->id == $usuarioLogadoId) {
-            return redirect()->back()->with('error', 'Você não pode excluir a sua própria conta.');
+        if ($usuario->id === auth()->id()) {
+            return redirect()->route('usuarios.index')
+                ->with('error', 'Você não pode excluir sua própria conta!');
         }
 
-        // 2. Um Gestor não pode excluir um Administrador
-        if ($tipoUsuarioLogado != 3 && $usuario->codigo_tipo == 3) {
-            return redirect()->back()->with('error', 'Você não tem permissão para excluir um Administrador.');
+        try {
+            $usuario->delete();
+            return redirect()->route('usuarios.index')
+                ->with('success', "O usuário {$usuario->nome} foi movido para a lixeira.");
+
+        } catch (\Exception $e) {
+            return redirect()->route('usuarios.index')
+                ->with('error', 'Erro ao excluir usuário. Verifique se existem vínculos ativos.');
         }
-
-        // Se passou pelas travas, exclui o utilizador
-        $usuario->delete();
-
-        return redirect()->route('usuarios.index')->with('success', 'Utilizador excluído com sucesso!');
     }
 }

@@ -5,70 +5,86 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes; // Importante para o Soft Delete
 
 class Usuario extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     protected $table = 'usuarios';
 
+    /**
+     * Atributos que podem ser preenchidos em massa.
+     * Atualizado para refletir a nova migration.
+     */
     protected $fillable = [
         'nome',
+        'cpf',
         'email',
         'senha',
-        'codigo_tipo', 
-        'codigo_area'
+        'tipo_usuario', // Agora usamos a string direto (admin, supervisor, aluno)
     ];
 
-    // Trava de segurança para não vazar a senha em retornos JSON
+    /**
+     * Atributos escondidos em retornos de API/JSON.
+     */
     protected $hidden = [
         'senha',
+        'remember_token',
     ];
 
-    // Informa ao Laravel qual é a coluna de senha no momento do Login
+    /**
+     * Informa ao Laravel qual é a coluna de senha para a autenticação.
+     */
     public function getAuthPassword()
     {
         return $this->senha;
     }
 
-    /**
-     * Relacionamento: O usuário tem um Tipo (Gestor, Colaborador, etc).
-     */
-    public function tipo(): BelongsTo
-    {
-        return $this->belongsTo(TipoUsuario::class, 'codigo_tipo', 'id');
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | Helpers de Verificação de Perfil
+    |--------------------------------------------------------------------------
+    */
 
     /**
-     * Relacionamento: O usuário pertence a uma área.
-     */
-    public function area(): BelongsTo
-    {
-        return $this->belongsTo(Area::class, 'codigo_area', 'id');
-    }
-
-    /**
-     * Helper para verificar se é Gestor (Código 1)
-     */
-    public function isGestor(): bool
-    {
-        return $this->codigo_tipo == 1;
-    }
-
-    /**
-     * Helper para verificar se é Colaborador (Código 2)
-     */
-    public function isColaborador(): bool
-    {
-        return $this->codigo_tipo == 2;
-    }
-    
-    /**
-     * Helper para verificar se é Admin (Código 3)
+     * Verifica se o usuário é Administrador.
      */
     public function isAdmin(): bool
     {
-        return $this->codigo_tipo == 3;
+        return $this->tipo_usuario === 'admin';
+    }
+
+    /**
+     * Verifica se o usuário é Supervisor.
+     */
+    public function isSupervisor(): bool
+    {
+        return $this->tipo_usuario === 'supervisor';
+    }
+
+    /**
+     * Verifica se o usuário é Aluno.
+     */
+    public function isAluno(): bool
+    {
+        return $this->tipo_usuario === 'aluno';
+    }
+
+    /**
+     * Relacionamento: Um Aluno pode ter vários Supervisores (Many-to-Many).
+     * Se você criou a tabela vinculo_supervisao, este método é necessário.
+     */
+    public function supervisores()
+    {
+        return $this->belongsToMany(Usuario::class, 'vinculo_supervisao', 'aluno_id', 'supervisor_id');
+    }
+
+    /**
+     * Relacionamento: Um Supervisor pode ter vários Alunos (Many-to-Many).
+     */
+    public function alunos()
+    {
+        return $this->belongsToMany(Usuario::class, 'vinculo_supervisao', 'supervisor_id', 'aluno_id');
     }
 }

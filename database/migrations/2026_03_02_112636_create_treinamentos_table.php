@@ -6,22 +6,40 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('treinamentos', function (Blueprint $table) {
-            $table->id(); // Cria a coluna 'id' como Primary Key
-            $table->string('nome');
-            $table->text('descricao')->nullable(); // nullable permite salvar sem descrição
-            $table->boolean('ativo')->default(true); // Sugestão: controle de visibilidade
+            $table->id(); 
             
-            // Chave Estrangeira para a Área
-            $table->unsignedBigInteger('codigo_area');
-            $table->foreign('codigo_area')->references('id')->on('areas')->onDelete('cascade');
+            $table->string('nome', 200);
+            $table->string('slug')->unique()->nullable(); // Para URLs amigáveis
+            $table->text('descricao')->nullable();
             
-            $table->timestamps(); // Cria created_at e updated_at
+            /**
+             * Relacionamento com Categorias.
+             * Importante: A migration de 'categorias' deve rodar antes desta.
+             */
+            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('restrict');
+            
+            /**
+             * Status do treinamento (Ativo/Inativo)
+             */
+            $table->boolean('status')->default(true);
+            
+            /**
+             * Timestamps e SoftDeletes
+             */
+            $table->timestamps();
+            $table->softDeletes(); 
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('treinamentos');

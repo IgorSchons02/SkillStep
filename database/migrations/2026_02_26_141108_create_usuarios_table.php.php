@@ -6,31 +6,35 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('usuarios', function (Blueprint $table) {
-            // Chave primária padrão do Laravel (id)
             $table->id(); 
             
-            $table->string('nome');
-            $table->string('email')->unique();
+            $table->string('nome', 150);
+            
+            /**
+             * CPF como identificador único. 
+             * Usamos string para preservar zeros à esquerda e pontuação se necessário.
+             */
+            $table->string('cpf', 14)->unique(); 
+            
+            /**
+             * O e-mail deixa de ser unique no banco para permitir que 
+             * usuários deletados (Soft Delete) não bloqueiem novos cadastros,
+             * a validação de e-mail ativo será feita via Controller.
+             */
+            $table->string('email', 191);
+            
             $table->string('senha');            
             
-            // Coluna de Tipo de Usuário (Gestor, Colaborador, Admin)
-            $table->unsignedBigInteger('codigo_tipo')->default(2); // 2 = Colaborador por padrão
-            
-            // Relacionamento com a tabela de tipo_usuarios
-            // Usamos 'restrict' para que o banco não deixe você apagar um "tipo" se já existirem usuários atrelados a ele
-            $table->foreign('codigo_tipo')->references('id')->on('tipo_usuarios')->onDelete('restrict');
-            
-            // Coluna de Área (nullable porque o RH/Admin pode não ter área)
-            $table->unsignedBigInteger('codigo_area')->nullable();
-            
-            // Relacionamento com a tabela de áreas
-            // 'set null' garante que se uma área for apagada, o usuário não é deletado junto, apenas fica "sem área"
-            $table->foreign('codigo_area')->references('id')->on('areas')->onDelete('set null');
+            $table->enum('tipo_usuario', ['admin', 'supervisor', 'aluno'])->default('aluno');
             
             $table->timestamps();
+            $table->softDeletes(); 
         });
     }
 
