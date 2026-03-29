@@ -2,10 +2,11 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\TarefaController; 
-use App\Http\Controllers\TreinamentoController; 
-use App\Http\Controllers\CategoriaController; 
+use App\Http\Controllers\TarefaController;
+use App\Http\Controllers\TreinamentoController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\TrilhaController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,11 +31,12 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->group(function () {
         // A URL final será: /admin/dashboard
         Route::get('/dashboard', [HomeController::class, 'homeAdmin'])->name('homeAdmin');
-        
+
         Route::resource('tarefas', TarefaController::class);
         Route::resource('treinamentos', TreinamentoController::class);
         Route::resource('usuarios', UsuarioController::class);
         Route::resource('categorias', CategoriaController::class);
+        Route::resource('trilhas', TrilhaController::class);
     });
 
     // ── ÁREA DO SUPERVISOR ──

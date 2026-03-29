@@ -16,7 +16,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg-light);
     overflow-x: hidden;
 }
@@ -268,7 +268,9 @@ footer {
 }
 
 .category-card {
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
 }
 
 .category-card:hover {
@@ -302,4 +304,78 @@ footer {
     font-size: 0.75rem;
     letter-spacing: 0.5px;
     color: #6c757d;
+}
+
+.card-treinamento {
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+    border-radius: 12px;
+}
+.card-treinamento:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    border-color: #e85d2f;
+}
+
+.dual-list-box {
+    height: 350px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.list-group-item-action {
+    cursor: pointer;
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+}
+.list-group-item-action:hover {
+    border-left-color: #e85d2f;
+    background-color: #f8f9fa;
+}
+
+.step-number {
+    width: 24px;
+    height: 24px;
+    background: #1e2d40;
+    color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    margin-right: 10px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.view-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+.view-content {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 15px;
+}
+
+/* Estilos para o Drag and Drop */
+.cursor-grab {
+    cursor: grab;
+}
+.cursor-grab:active {
+    cursor: grabbing;
+}
+.sortable-ghost {
+    opacity: 0.4;
+    background-color: #f8f9fa;
+    border: 1px dashed #0d6efd !important;
 }

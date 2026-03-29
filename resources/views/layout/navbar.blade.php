@@ -21,19 +21,26 @@
             <li class="{{ Route::is('planos.meu-plano') ? 'active' : '' }}">
                 <a href="#">
                     <i class="bi bi-mortarboard"></i>
-                    <span>Meu Plano</span>
+                    <span>Meus Planos</span>
                 </a>
             </li>
 
             {{-- Menu Visível apenas para ADMIN --}}
             @if(Auth::user()->isAdmin())
                 <hr class="mx-3 my-2 opacity-25 text-white">
-                <li class="{{ Route::is('usuarios.*') ? 'active' : '' }}">
-                    <a href="{{ route('usuarios.index') }}">
-                        <i class="bi bi-people"></i>
-                        <span>Usuários</span>
+                <li class="{{ Route::is('trilhas.*') ? 'active' : '' }}">
+                    <a href="{{ route('trilhas.index') }}">
+                        <i class="bi bi-signpost-split-fill"></i>
+                        <span>Trilhas</span>
                     </a>
                 </li>
+                <li class="{{ Route::is('treinamentos.*') ? 'active' : '' }}">
+                    <a href="{{ route('treinamentos.index') }}">
+                        <i class="bi bi-journal-check"></i>
+                        <span>Treinamentos</span>
+                    </a>
+                </li>
+
                 <li class="{{ Route::is('tarefas.*') ? 'active' : '' }}">
                     <a href="{{ route('tarefas.index') }}">
                         <i class="bi bi-list-task"></i>
@@ -46,10 +53,10 @@
                         <span>Categorias</span>
                     </a>
                 </li>
-                <li class="{{ Route::is('treinamentos.*') ? 'active' : '' }}">
-                    <a href="{{ route('treinamentos.index') }}">
-                        <i class="bi bi-journal-check"></i>
-                        <span>Treinamentos</span>
+                <li class="{{ Route::is('usuarios.*') ? 'active' : '' }}">
+                    <a href="{{ route('usuarios.index') }}">
+                        <i class="bi bi-people"></i>
+                        <span>Usuários</span>
                     </a>
                 </li>
             @endif

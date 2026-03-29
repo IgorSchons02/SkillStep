@@ -2,167 +2,116 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Treinamento;
-use App\Models\Area;
 use App\Models\Tarefa;
+use App\Models\Categoria;
+use Illuminate\Http\Request;
 
 class TreinamentoController extends Controller
 {
-    /**
-     * Lista os treinamentos com filtros, ordenação e regra de tenant.
-     */
     public function index(Request $request)
     {
-        // Traz a área junto para evitar N+1
-        //$query = Treinamento::with('area');
-        //$query = Treinamento::with('area')->withCount('tarefas');
-        $query = Treinamento::with(['area', 'tarefas'])->withCount('tarefas');
+        // 1. Query principal dos treinamentos
+        $query = Treinamento::with('tarefas.categoria'); // Puxa as tarefas e as categorias delas para calcular o tempo total na View
 
-        // Filtro de Pesquisa (Texto no Nome ou Descrição)
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nome', 'like', '%' . $request->search . '%')
-                    ->orWhere('descricao', 'like', '%' . $request->search . '%');
-            });
-        }
-        if ($request->has('status') && $request->status !== null && $request->status !== '') {
-            $query->where('ativo', $request->status);
+            $query->where('nome', 'like', '%' . $request->search . '%');
         }
 
-        // Regra de Visibilidade por Área (Multi-tenant)
-        $codigoAreaUsuario = session('codigo_area');
-
-        if ($codigoAreaUsuario) {
-            // Força o filtro para a área do gestor logado
-            $query->where('codigo_area', $codigoAreaUsuario);
-            $areas = collect();
-        } else {
-            // Se for RH/Super Admin, permite o uso do filtro de tela
-            if ($request->filled('area')) {
-                $query->where('codigo_area', $request->area);
-            }
-            $areas = Area::all();
+        if ($request->has('status') && $request->status !== null) {
+            $query->where('status', $request->status);
         }
 
-        // Ordenação Dinâmica
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortDir = $request->input('sort_direction', 'asc');
-        $colunasPermitidas = ['nome', 'created_at'];
+        $treinamentos = $query->latest()->paginate(9); // Paginação de 9 cards (3x3)
 
-        if (in_array($sortBy, $colunasPermitidas)) {
-            $query->orderBy($sortBy, $sortDir);
-        } else {
-            $query->oldest();
+        // Simulação da trava de Trilha (No futuro, você fará: $treinamento->trilhas()->exists())
+        // Estou injetando um atributo falso para o JS ler na view e bloquear o ícone de excluir tarefas
+        foreach ($treinamentos as $treinamento) {
+            $treinamento->em_trilha = false; // Mude para true depois quando a tabela Trilhas existir
         }
 
-        // Paginação
-        $treinamentos = $query->paginate(10);
-        $codigoAreaUsuario = session('codigo_area');
-        if ($codigoAreaUsuario) {
-            // Se for gestor, busca só as tarefas da área dele
-            $tarefasDisponiveis = Tarefa::where('codigo_area', $codigoAreaUsuario)->orderBy('titulo')->get();
-        } else {
-            // Se for RH/Super Admin, busca todas as tarefas (trazendo a área junto para exibir na tela)
-            $tarefasDisponiveis = Tarefa::with('area')->orderBy('titulo')->get();
-        }
+        // 2. Dados necessários para alimentar a Modal de Criação (O JSON do JavaScript)
+        // Só puxamos as ativas para a coluna da esquerda
+        $tarefasDisponiveis = Tarefa::with('categoria')->where('status', 1)->get();
+        $categorias = Categoria::orderBy('nome')->get();
 
-        // Não esqueça de adicionar a variável $tarefasDisponiveis no compact()
-        return view('gestor.treinamentos.index', compact('treinamentos', 'areas', 'tarefasDisponiveis'));
+        return view('admin.treinamentos.index', compact('treinamentos', 'tarefasDisponiveis', 'categorias'));
     }
 
-    /**
-     * Salva um novo treinamento no banco.
-     */
     public function store(Request $request)
     {
-        // 1. Atualizamos a validação para aceitar um array de tarefas
         $request->validate([
-            'nome' => 'required|string|max:255',
-            'descricao' => 'nullable|string',
-            'codigo_area' => 'required|exists:areas,id',
-            'tarefas' => 'nullable|array', // As tarefas vêm em formato de Array dos checkboxes
-            'tarefas.*' => 'exists:tarefas,id' // Garante que as tarefas selecionadas realmente existem
+            'nome' => 'required|string|max:100',
+            'descricao' => 'nullable|string|max:255',
+            'tarefas_sequencia' => 'required|string' // O JSON que vem do Front-end
         ]);
 
-        // 2. Cria o treinamento normalmente
         $treinamento = Treinamento::create([
             'nome' => $request->nome,
             'descricao' => $request->descricao,
-            'codigo_area' => $request->codigo_area,
-            'ativo' => $request->has('ativo') ? true : false,
+            'status' => $request->has('status') && $request->status == '1'
         ]);
 
-        // 3. --- NOVO: Sincroniza as tarefas na tabela Pivot ---
-        if ($request->has('tarefas')) {
-            $tarefasSync = [];
+        // Decodifica o Array JSON: "[10, 2, 5]" -> [10, 2, 5]
+        $tarefasIds = json_decode($request->tarefas_sequencia, true);
 
-            // Faz um loop nas tarefas selecionadas e já cria a "ordem" (1, 2, 3...)
-            foreach ($request->tarefas as $index => $tarefaId) {
-                $tarefasSync[$tarefaId] = ['ordem' => $index + 1];
-            }
-
-            // O sync() salva tudo na tabela 'treinamento_tarefas' em uma única viagem ao banco!
-            $treinamento->tarefas()->sync($tarefasSync);
+        // Monta o array com a ordem para sincronizar no banco
+        $syncData = [];
+        foreach ($tarefasIds as $index => $tarefaId) {
+            $syncData[$tarefaId] = ['ordem' => $index + 1];
         }
 
-        return redirect()->route('treinamentos.index')->with('success', 'Treinamento criado com sucesso!');
+        // Grava as tarefas na tabela intermediária
+        $treinamento->tarefas()->sync($syncData);
+
+        return redirect()->route('treinamentos.index')->with('success', 'Treinamento montado com sucesso!');
     }
 
-    /**
-     * Atualiza os dados de um treinamento existente.
-     */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'nome' => 'required|string|max:255',
-            'descricao' => 'nullable|string',
-            'codigo_area' => 'required|exists:areas,id',
-            'tarefas' => 'nullable|array',
-            'tarefas.*' => 'exists:tarefas,id'
-        ]);
-
         $treinamento = Treinamento::findOrFail($id);
 
-        if (session('codigo_area') && $treinamento->codigo_area != session('codigo_area')) {
-            abort(403, 'Você não tem permissão para editar um treinamento de outra área.');
-        }
+        $request->validate([
+            'nome' => 'required|string|max:100',
+            'descricao' => 'nullable|string|max:255',
+            'tarefas_sequencia' => 'required|string'
+        ]);
 
         $treinamento->update([
             'nome' => $request->nome,
             'descricao' => $request->descricao,
-            'codigo_area' => $request->codigo_area,
-            'ativo' => $request->has('ativo') ? true : false,
+            'status' => $request->has('status') && $request->status == '1'
         ]);
 
-        // --- ATUALIZA AS TAREFAS NA TABELA PIVOT ---
-        if ($request->has('tarefas')) {
-            $tarefasSync = [];
-            foreach ($request->tarefas as $index => $tarefaId) {
-                $tarefasSync[$tarefaId] = ['ordem' => $index + 1];
-            }
-            $treinamento->tarefas()->sync($tarefasSync);
-        } else {
-            // Se ele desmarcou todas as tarefas, removemos todos os vínculos
-            $treinamento->tarefas()->detach();
+        $tarefasIds = json_decode($request->tarefas_sequencia, true);
+
+        $syncData = [];
+        foreach ($tarefasIds as $index => $tarefaId) {
+            $syncData[$tarefaId] = ['ordem' => $index + 1];
         }
+
+        // O sync() inteligentemente apaga as que saíram e insere as novas na ordem certa
+        $treinamento->tarefas()->sync($syncData);
 
         return redirect()->route('treinamentos.index')->with('success', 'Treinamento atualizado com sucesso!');
     }
 
-    /**
-     * Exclui um treinamento.
-     */
     public function destroy($id)
     {
         $treinamento = Treinamento::findOrFail($id);
 
-        if (session('codigo_area') && $treinamento->codigo_area != session('codigo_area')) {
-            abort(403, 'Você não tem permissão para excluir um treinamento de outra área.');
+        // Trava para quando você criar as Trilhas
+
+        if ($treinamento->trilhas()->exists()) {
+            return redirect()->route('treinamentos.index')->with('error', 'Este treinamento já pertence a uma trilha e não pode ser apagado.');
         }
 
-        $treinamento->delete();
 
-        return redirect()->route('treinamentos.index')->with('success', 'Treinamento excluído com sucesso!');
+        try {
+            $treinamento->delete();
+            return redirect()->route('treinamentos.index')->with('success', 'Treinamento removido com sucesso!');
+        } catch (\Exception $e) {
+            return redirect()->route('treinamentos.index')->with('error', 'Erro ao excluir o treinamento.');
+        }
     }
 }

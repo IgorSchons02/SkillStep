@@ -6,45 +6,32 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tarefas', function (Blueprint $table) {
-            $table->id(); 
+            $table->id();
             
-            $table->string('titulo', 200);
-            $table->text('descricao');
+            // Relacionamento com a Categoria
+            $table->foreignId('categoria_id')
+                  ->constrained('categorias')
+                  ->restrictOnDelete(); // Impede excluir a categoria se tiver tarefas nela
             
-            /**
-             * Relacionamento com a nova tabela de Categorias.
-             * Usamos 'restrict' para não permitir deletar uma categoria que tenha tarefas.
-             */
-            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('restrict');
+            $table->string('titulo', 100);
             
-            /**
-             * Tempo estimado armazenado em MINUTOS (INT).
-             * Onde 1.5h no front será 90 no banco.
-             */
-            $table->integer('tempo_estimado');
+            // Usamos string longa ou text para garantir que URLs gigantes caibam sem cortar
+            $table->text('descricao'); 
             
-            /**
-             * Status da tarefa (1 = Ativo, 0 = Inativo)
-             */
+            // Decimal com 1 casa após a vírgula (Ex: 0.5, 1.5, 10.0)
+            $table->decimal('tempo_estimado', 5, 1); 
+            
+            // Status para inativar (já que não teremos soft delete)
             $table->boolean('status')->default(true);
             
-            /**
-             * Timestamps padrão e SoftDeletes para auditoria
-             */
-            $table->timestamps();
-            $table->softDeletes(); 
+            // Gera as colunas 'created_at' e 'updated_at'
+            $table->timestamps(); 
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tarefas');
