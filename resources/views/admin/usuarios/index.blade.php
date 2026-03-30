@@ -126,9 +126,9 @@
     <div class="modal fade" id="modalNovoUsuario" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold">Novo Usuário</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i>Novo Usuário</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form action="{{ route('usuarios.store') }}" method="POST">
                     @csrf
@@ -230,6 +230,21 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
+            // --- Tratamento de Erros (Ex: Usuário já existente) ---
+            @if($errors->any())
+                // Mantém a modal aberta
+                const modalNovoUsuario = new bootstrap.Modal(document.getElementById('modalNovoUsuario'));
+                modalNovoUsuario.show();
+
+                // Dispara o alerta com o erro do Laravel (ex: CPF já cadastrado)
+                Swal.fire({
+                    title: 'Atenção!',
+                    text: '{{ $errors->first() }}',
+                    icon: 'warning',
+                    confirmButtonColor: '#e85d2f'
+                });
+            @endif
 
             // --- Aplicação da Máscara de CPF ---
             const cpfInputs = document.querySelectorAll('.cpf-mask');

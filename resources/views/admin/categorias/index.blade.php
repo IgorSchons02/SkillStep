@@ -8,7 +8,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="fw-bold text-dark">Categorias</h2>
-                <p class="text-muted mb-0">Organize os treinamentos do SkillStep por áreas de conhecimento.</p>
+                <p class="text-muted mb-0">Organize as tarefas do SkillStep por áreas de conhecimento.</p>
             </div>
             <button type="button" class="btn btn-primary px-4 shadow-sm" data-bs-toggle="modal"
                 data-bs-target="#modalNovaCategoria">
@@ -78,7 +78,7 @@
                         <div class="card-footer bg-transparent border-0 pt-0 pb-3 ps-3">
                             <span class="badge rounded-pill bg-light text-dark border">
                                 <i class="bi bi-journal-bookmark me-1" style="color: {{ $cat->cor_hex }}"></i>
-                                {{ $cat->treinamentos_count ?? 0 }} Treinamentos
+                                {{ $cat->tarefas_count ?? 0 }} Tarefas
                             </span>
                         </div>
                     </div>
@@ -200,7 +200,7 @@
 
                     Swal.fire({
                         title: 'Excluir Categoria?',
-                        html: `Você está prestes a remover a categoria <strong>"${categoriaNome}"</strong>.<br><small class="text-muted">Isso pode afetar treinamentos vinculados!</small>`,
+                        html: `Você está prestes a remover a categoria <strong>"${categoriaNome}"</strong>.<br><small class="text-muted">Isso pode afetar tarefas vinculadas!</small>`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#e85d2f',

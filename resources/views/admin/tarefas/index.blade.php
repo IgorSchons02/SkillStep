@@ -150,7 +150,7 @@
                                 <label class="form-label fw-bold">Título da Tarefa <span
                                         class="text-danger">*</span></label>
                                 <input type="text" name="titulo" class="form-control" required maxlength="100"
-                                    placeholder="Ex: Treinamento de VPN">
+                                    placeholder="Ex: Tarefa de VPN">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label fw-bold d-block">Status</label>

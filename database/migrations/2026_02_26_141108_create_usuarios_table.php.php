@@ -18,15 +18,10 @@ return new class extends Migration
             
             /**
              * CPF como identificador único. 
-             * Usamos string para preservar zeros à esquerda e pontuação se necessário.
+             * Usamos string para preservar zeros à esquerda.
              */
-            $table->string('cpf', 14)->unique(); 
+            $table->string('cpf', 11)->unique(); 
             
-            /**
-             * O e-mail deixa de ser unique no banco para permitir que 
-             * usuários deletados (Soft Delete) não bloqueiem novos cadastros,
-             * a validação de e-mail ativo será feita via Controller.
-             */
             $table->string('email', 191);
             
             $table->string('senha');            
@@ -34,7 +29,6 @@ return new class extends Migration
             $table->enum('tipo_usuario', ['admin', 'supervisor', 'aluno'])->default('aluno');
             
             $table->timestamps();
-            $table->softDeletes(); 
         });
     }
 

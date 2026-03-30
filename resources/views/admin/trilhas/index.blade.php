@@ -433,6 +433,12 @@
         }
 
         function submeterTrilha() {
+            const form = document.getElementById("formTrilha");
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return false;
+            }
+
             const selecionadasValidas = selecionadasID.filter(id => treinamentosDisponiveisDB.some(t => t.id == id));
 
             if (selecionadasValidas.length === 0) {
@@ -440,7 +446,7 @@
                 return false;
             }
             document.getElementById("treinamentos_sequencia").value = JSON.stringify(selecionadasValidas);
-            document.getElementById("formTrilha").submit();
+            form.submit();
         }
 
         // === FUNÇÃO DE VISUALIZAÇÃO ===

@@ -18,8 +18,8 @@
                 </a>
             </li>
 
-            <li class="{{ Route::is('planos.meu-plano') ? 'active' : '' }}">
-                <a href="#">
+            <li class="{{ Route::is('meus-planos.*') ? 'active' : '' }}">
+                <a href="{{ route('meus-planos.index') }}">
                     <i class="bi bi-mortarboard"></i>
                     <span>Meus Planos</span>
                 </a>
@@ -28,6 +28,12 @@
             {{-- Menu Visível apenas para ADMIN --}}
             @if(Auth::user()->isAdmin())
                 <hr class="mx-3 my-2 opacity-25 text-white">
+                <li class="{{ Route::is('planos.*') ? 'active' : '' }}">
+                    <a href="{{ route('planos.index') }}">
+                        <i class="bi bi-person-workspace"></i>
+                        <span>Planos de estudo</span>
+                    </a>
+                </li>
                 <li class="{{ Route::is('trilhas.*') ? 'active' : '' }}">
                     <a href="{{ route('trilhas.index') }}">
                         <i class="bi bi-signpost-split-fill"></i>

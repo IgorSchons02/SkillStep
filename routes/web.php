@@ -7,6 +7,8 @@ use App\Http\Controllers\TreinamentoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\TrilhaController;
+use App\Http\Controllers\PlanoController;
+use App\Http\Middleware\ValidaPerfil; // <-- Importação do seu novo Middleware
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,17 +21,15 @@ Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'autenticar'])->name('login.autenticar');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Grupos de Rotas Protegidas
-// Grupos de Rotas Protegidas
+// Grupos de Rotas Protegidas (Apenas Logados)
 Route::middleware(['auth'])->group(function () {
 
     // Rota curinga que redireciona conforme o perfil
-    // Quando você acessar /home, o HomeController decide para onde você vai
     Route::get('/home', [HomeController::class, 'index'])->name('home');
-
+        
     // ── ÁREA DO ADMIN ──
-    Route::prefix('admin')->group(function () {
-        // A URL final será: /admin/dashboard
+    // Adicionamos o middleware exigindo o perfil 'admin'
+    Route::prefix('admin')->middleware([ValidaPerfil::class . ':admin'])->group(function () {
         Route::get('/dashboard', [HomeController::class, 'homeAdmin'])->name('homeAdmin');
 
         Route::resource('tarefas', TarefaController::class);
@@ -37,17 +37,23 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('usuarios', UsuarioController::class);
         Route::resource('categorias', CategoriaController::class);
         Route::resource('trilhas', TrilhaController::class);
+        Route::resource('planos', PlanoController::class);
     });
 
     // ── ÁREA DO SUPERVISOR ──
-    Route::prefix('supervisor')->group(function () {
-        // A URL final será: /supervisor/dashboard
+    // Adicionamos o middleware exigindo o perfil 'supervisor'
+    Route::prefix('supervisor')->middleware([ValidaPerfil::class . ':supervisor'])->group(function () {
         Route::get('/dashboard', [HomeController::class, 'homeSupervisor'])->name('homeSupervisor');
     });
 
     // ── ÁREA DO ALUNO ──
-    Route::prefix('aluno')->group(function () {
-        // A URL final será: /aluno/dashboard
+    // Adicionamos o middleware exigindo o perfil 'aluno'
+    Route::prefix('aluno')->middleware([ValidaPerfil::class . ':aluno'])->group(function () {
         Route::get('/dashboard', [HomeController::class, 'homeAluno'])->name('homeAluno');
     });
+
+    // ── ÁREA COMUM (Acessível por todos os logados) ──
+    Route::resource('meus-planos', \App\Http\Controllers\MeusPlanosController::class)->only(['index', 'show']);
+    Route::post('meus-planos/{id}/progresso', [\App\Http\Controllers\MeusPlanosController::class, 'updateProgresso']);
+
 });

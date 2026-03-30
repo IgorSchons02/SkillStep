@@ -122,7 +122,7 @@
                                 <label class="form-label fw-bold small text-uppercase">Nome do Treinamento <span
                                         class="text-danger">*</span></label>
                                 <input type="text" name="nome" id="nome" class="form-control form-control-lg" required
-                                    maxlength="100" placeholder="Ex: Onboarding Desenvolvedor" />
+                                    maxlength="100" placeholder="Ex: Treinamento de Desenvolvedor" />
                             </div>
                             <div class="col-md-4 d-flex align-items-end">
                                 <div class="form-check form-switch mb-2 ms-3">
@@ -443,6 +443,14 @@
         }
 
         function submeterTreinamento() {
+            const form = document.getElementById("formTreinamento");
+
+            // Validação nativa de HTML (required, maxlength, etc.)
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return false;
+            }
+
             // Remove do array IDs que possam estar sujos (inativos/apagados) antes de enviar para o banco
             const selecionadasValidas = selecionadasID.filter(id => tarefasDisponiveisDB.some(t => t.id == id));
 
@@ -450,8 +458,9 @@
                 document.getElementById("erroListaVazia").classList.remove('d-none');
                 return false;
             }
+
             document.getElementById("tarefas_sequencia").value = JSON.stringify(selecionadasValidas);
-            document.getElementById("formTreinamento").submit();
+            form.submit();
         }
 
         // === FUNÇÃO DE VISUALIZAÇÃO ===

@@ -24,7 +24,6 @@ return new class extends Migration
             $table->string('cor_hex', 7)->default('#3498db');
 
             $table->timestamps();
-            $table->softDeletes(); // Mantendo o padrão de segurança de dados
         });
     }
 

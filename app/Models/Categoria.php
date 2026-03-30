@@ -3,12 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Categoria extends Model
 {
-    use SoftDeletes;
-
     protected $table = 'categorias';
 
     protected $fillable = [
@@ -20,8 +17,8 @@ class Categoria extends Model
     /**
      * Uma categoria possui muitos treinamentos
      */
-    public function treinamentos()
+    public function tarefas()
     {
-        return $this->hasMany(Treinamento::class);
+        return $this->hasMany(Tarefa::class, 'categoria_id');
     }
 }
