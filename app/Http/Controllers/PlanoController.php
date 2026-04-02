@@ -71,10 +71,12 @@ class PlanoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'titulo' => 'required|string|max:150',
+            'titulo' => 'required|string|max:150|unique:planos,titulo',
             'usuario_id' => 'required|exists:usuarios,id',
             'estrutura' => 'required|string', // Recebemos como string JSON do front-end
             'supervisores' => 'required|array'
+        ],[
+            'titulo.unique' => 'Já existe um plano de estudos cadastrado com este título. Escolha outro título.',
         ]);
 
         // Transforma o JSON string em Array PHP
@@ -99,10 +101,12 @@ class PlanoController extends Controller
         $plano = Plano::findOrFail($id);
 
         $request->validate([
-            'titulo' => 'required|string|max:150',
+            'titulo' => 'required|string|max:150|unique:planos,titulo,' . $id,
             'usuario_id' => 'required|exists:usuarios,id',
             'estrutura' => 'required|string',
             'supervisores' => 'required|array'
+        ],[
+            'titulo.unique' => 'Já existe um plano de estudos cadastrado com este título. Escolha outro título.',
         ]);
 
         $estruturaArray = json_decode($request->estrutura, true);
@@ -129,6 +133,19 @@ class PlanoController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('planos.index')->with('error', 'Erro ao excluir o plano de estudos.');
         }
+    }
+
+    /**
+     * Exibe o Plano para o Aluno ou Supervisor.
+     */
+    public function show($id)
+    {
+        $plano = Plano::with('aluno')->findOrFail($id);
+
+        // Ao invés de mandar a 'estrutura' crua, chamamos o accessor que criamos na Model
+        $estruturaEnriquecida = $plano->estrutura_enriquecida;
+
+        return view('planos.show', compact('plano', 'estruturaEnriquecida'));
     }
 
     /**

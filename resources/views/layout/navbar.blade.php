@@ -31,7 +31,7 @@
                 <li class="{{ Route::is('planos.*') ? 'active' : '' }}">
                     <a href="{{ route('planos.index') }}">
                         <i class="bi bi-person-workspace"></i>
-                        <span>Planos de estudo</span>
+                        <span>Planos de Estudos</span>
                     </a>
                 </li>
                 <li class="{{ Route::is('trilhas.*') ? 'active' : '' }}">
@@ -80,9 +80,9 @@
 
             <hr class="mx-3 my-2 opacity-25 text-white">
             <li>
-                <a href="#">
-                    <i class="bi bi-info-circle"></i>
-                    <span>Sobre Nós</span>
+                <a href="{{ route('perfil.index') }}">
+                    <i class="bi bi-person"></i>
+                    <span>Meu Perfil</span>
                 </a>
             </li>
         </ul>

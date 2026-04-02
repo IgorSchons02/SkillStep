@@ -14,7 +14,8 @@ return new class extends Migration
             // Relacionamento com o Aluno (tabela usuarios)
             $table->foreignId('usuario_id')->constrained('usuarios')->cascadeOnDelete();
             
-            $table->string('titulo', 150);
+            // Adicionado ->unique()
+            $table->string('titulo', 150)->unique();
             
             // Cache do progresso para a tela de listagem carregar rápido (0 a 100)
             $table->tinyInteger('progresso')->default(0); 

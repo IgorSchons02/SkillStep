@@ -142,7 +142,7 @@
                             </div>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label fw-bold small text-uppercase">Descrição Curta</label>
+                            <label class="form-label fw-bold small text-uppercase">Descrição</label>
                             <textarea name="descricao" id="descricaoTrilha" class="form-control" rows="2" maxlength="255"
                                 placeholder="Descreva o objetivo desta formação..."></textarea>
                         </div>
@@ -151,8 +151,7 @@
                         {{-- DUAL LIST BOX --}}
                         <div class="row mt-4">
                             <div class="col-md-6 border-end">
-                                <label class="form-label fw-bold text-primary mb-2">Treinamentos Disponíveis (Apenas
-                                    Ativos)</label>
+                                <label class="form-label fw-bold text-primary mb-2">Treinamentos Disponíveis</label>
                                 <div class="input-group input-group-sm mb-3">
                                     <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
                                     <input type="text" id="filtroTreinamento" class="form-control bg-light border-0"
@@ -163,7 +162,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label fw-bold text-success mb-0">Sequência da Formação <span
+                                    <label class="form-label fw-bold text-success mb-0">Sequência da trilha <span
                                             class="text-danger">*</span></label>
                                     <div class="d-flex gap-2">
                                         <span class="badge bg-info text-dark" id="tempoTotalModal"><i

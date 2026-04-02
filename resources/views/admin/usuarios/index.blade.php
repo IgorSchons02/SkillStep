@@ -26,7 +26,7 @@
                                 placeholder="Buscar por nome, e-mail ou CPF..." value="{{ request('search') }}">
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-4">
                         <select name="tipo" class="form-select bg-light border-0">
                             <option value="">Todos os perfis</option>
                             <option value="admin" {{ request('tipo') == 'admin' ? 'selected' : '' }}>Admin</option>
@@ -35,9 +35,9 @@
                             <option value="aluno" {{ request('tipo') == 'aluno' ? 'selected' : '' }}>Aluno</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <!-- <div class="col-md-2">
                         <button type="submit" class="btn btn-secondary w-100">Filtrar</button>
-                    </div>
+                    </div> -->
                 </form>
             </div>
         </div>
@@ -136,7 +136,7 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold">Nome Completo</label>
-                                <input type="text" name="nome" class="form-control" required placeholder="Ex: Igor Schons">
+                                <input type="text" name="nome" class="form-control" required required maxlength="100" placeholder="Ex: Igor Schons">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">CPF</label>
@@ -255,6 +255,7 @@
             // --- Lógica de Pesquisa em Tempo Real ---
             const searchInput = document.getElementById('searchInput');
             const searchForm = searchInput.closest('form');
+            const typeSelect = searchForm.querySelector('select[name="tipo"]');
             let timeout = null;
 
             searchInput.addEventListener('keyup', function () {
@@ -263,6 +264,13 @@
                     searchForm.submit();
                 }, 500);
             });
+
+            // Submissão automática do filtro de tipo, sem botão
+            if (typeSelect) {
+                typeSelect.addEventListener('change', function () {
+                    searchForm.submit();
+                });
+            }
 
             // Foco no input de busca ao carregar
             if (searchInput.value !== "") {

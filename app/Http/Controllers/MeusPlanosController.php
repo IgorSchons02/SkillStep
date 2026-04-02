@@ -33,7 +33,7 @@ class MeusPlanosController extends Controller
         return view('meus_planos.index', compact('planos'));
     }
 
-public function show($id)
+    public function show($id)
     {
         $plano = Plano::findOrFail($id);
         
@@ -44,10 +44,15 @@ public function show($id)
         if ($plano->usuario_id !== Auth::id() && Auth::user()->tipo_usuario !== 'admin' && !$isSupervisor) {
             abort(403, 'Acesso não autorizado a este plano de estudos.');
         }
+
+        // 1. Chama o nosso Accessor mágico que cruza o JSON com o Banco de Dados para buscar a flag de 'descontinuada'
+        $estruturaEnriquecida = $plano->estrutura_enriquecida;
         
+        // 2. Mantém a sua busca de descrições no banco
         $tarefasBd = Tarefa::select('id', 'descricao')->get()->keyBy('id');
         
-        return view('meus_planos.show', compact('plano', 'tarefasBd'));
+        // 3. Envia a estrutura enriquecida para a view
+        return view('meus_planos.show', compact('plano', 'tarefasBd', 'estruturaEnriquecida'));
     }
 
     /**

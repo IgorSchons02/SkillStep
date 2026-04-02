@@ -41,9 +41,11 @@ class TreinamentoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nome' => 'required|string|max:100',
+            'nome' => 'required|string|max:100|unique:treinamentos,nome',
             'descricao' => 'nullable|string|max:255',
             'tarefas_sequencia' => 'required|string' // O JSON que vem do Front-end
+        ],[
+            'nome.unique' => 'Já existe um treinamento cadastrado com este nome. Escolha outro título.',
         ]);
 
         $treinamento = Treinamento::create([
@@ -72,9 +74,11 @@ class TreinamentoController extends Controller
         $treinamento = Treinamento::findOrFail($id);
 
         $request->validate([
-            'nome' => 'required|string|max:100',
+            'nome' => 'required|string|max:100|unique:treinamentos,nome,' . $id,
             'descricao' => 'nullable|string|max:255',
             'tarefas_sequencia' => 'required|string'
+        ],[
+            'nome.unique' => 'Já existe um treinamento cadastrado com este nome. Escolha outro título.',
         ]);
 
         $treinamento->update([
@@ -96,22 +100,53 @@ class TreinamentoController extends Controller
         return redirect()->route('treinamentos.index')->with('success', 'Treinamento atualizado com sucesso!');
     }
 
+    // public function destroy($id)
+    // {
+    //     $treinamento = Treinamento::findOrFail($id);
+
+    //     // Trava para quando você criar as Trilhas
+
+    //     if ($treinamento->trilhas()->exists()) {
+    //         return redirect()->route('treinamentos.index')->with('error', 'Este treinamento já pertence a uma trilha e não pode ser apagado.');
+    //     }
+
+
+    //     try {
+    //         $treinamento->delete();
+    //         return redirect()->route('treinamentos.index')->with('success', 'Treinamento removido com sucesso!');
+    //     } catch (\Exception $e) {
+    //         return redirect()->route('treinamentos.index')->with('error', 'Erro ao excluir o treinamento.');
+    //     }
+    // }
     public function destroy($id)
     {
         $treinamento = Treinamento::findOrFail($id);
 
-        // Trava para quando você criar as Trilhas
-
         if ($treinamento->trilhas()->exists()) {
-            return redirect()->route('treinamentos.index')->with('error', 'Este treinamento já pertence a uma trilha e não pode ser apagado.');
+            return back()->with('error', 'Este treinamento está vinculado a uma trilha.');
         }
 
+        $emUsoNoPlano = false;
 
-        try {
-            $treinamento->delete();
-            return redirect()->route('treinamentos.index')->with('success', 'Treinamento removido com sucesso!');
-        } catch (\Exception $e) {
-            return redirect()->route('treinamentos.index')->with('error', 'Erro ao excluir o treinamento.');
+        \App\Models\Plano::chunk(100, function ($planos) use ($id, &$emUsoNoPlano) {
+            foreach ($planos as $plano) {
+                $trilhas = $plano->estrutura['trilhas'] ?? [];
+                foreach ($trilhas as $trilha) {
+                    foreach ($trilha['treinamentos'] ?? [] as $treino) {
+                        if (($treino['id'] ?? null) == $id) {
+                            $emUsoNoPlano = true;
+                            return false;
+                        }
+                    }
+                }
+            }
+        });
+
+        if ($emUsoNoPlano) {
+            return back()->with('error', 'Exclusão bloqueada: Este treinamento está ativo dentro do Plano de Estudos de um aluno.');
         }
+
+        $treinamento->delete();
+        return redirect()->route('treinamentos.index')->with('success', 'Treinamento excluído com sucesso!');
     }
 }

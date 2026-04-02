@@ -9,7 +9,10 @@ return new class extends Migration {
     {
         Schema::create('trilhas', function (Blueprint $table) {
             $table->id();
-            $table->string('nome', 100);
+            
+            // Adicionado ->unique()
+            $table->string('nome', 100)->unique(); 
+            
             $table->string('descricao', 255)->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();

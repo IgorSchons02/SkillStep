@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\TrilhaController;
 use App\Http\Controllers\PlanoController;
+use App\Http\Controllers\PerfilController;
 use App\Http\Middleware\ValidaPerfil; // <-- Importação do seu novo Middleware
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -23,10 +24,12 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Grupos de Rotas Protegidas (Apenas Logados)
 Route::middleware(['auth'])->group(function () {
-
+    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
+    Route::put('/perfil/atualizar-dados', [PerfilController::class, 'update'])->name('perfil.update');
+    Route::put('/perfil/atualizar-senha', [PerfilController::class, 'updatePassword'])->name('perfil.password');
     // Rota curinga que redireciona conforme o perfil
     Route::get('/home', [HomeController::class, 'index'])->name('home');
-        
+
     // ── ÁREA DO ADMIN ──
     // Adicionamos o middleware exigindo o perfil 'admin'
     Route::prefix('admin')->middleware([ValidaPerfil::class . ':admin'])->group(function () {

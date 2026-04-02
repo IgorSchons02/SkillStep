@@ -5,7 +5,7 @@
 @push('css')
 <style>
     :root { --primary-color: #0d6efd; --skill-purple: #6610f2; }
-    .bg-gradient-skill { background: linear-gradient(45deg, #e85d2f, #d4491c); }
+    .bg-gradient-skill { background: linear-gradient(45deg, #2f88e8, #1c69d4); }
     .sticky-sidebar { position: sticky; top: 80px; }
     
     .tree-node { border-left: 4px solid #dee2e6; transition: 0.3s; background: #fff; }
@@ -101,7 +101,8 @@
     let planoAtivo = @json($plano);
     const tarefasBd = @json($tarefasBd); // Dicionário de descrições que veio do Controller
     
-    if (!planoAtivo.estrutura) planoAtivo.estrutura = { trilhas: [] };
+    // ATUALIZAÇÃO: Garante que a estrutura utilizada seja a Enriquecida pelo Back-End (com as flags de descontinuado)
+    planoAtivo.estrutura = @json($estruturaEnriquecida ?? null) || planoAtivo.estrutura || { trilhas: [] };
 
     let sessoesAbertas = new Set();
 
@@ -198,6 +199,9 @@
                 badgeData = `<span class="badge bg-warning text-dark ms-2"><i class="bi bi-calendar-event me-1"></i>${new Date(trilha.data_sugerida + 'T00:00:00').toLocaleDateString('pt-BR')}</span>`;
             }
 
+            // Flag de Descontinuado (Trilha)
+            const badgeTrilhaDesc = trilha.descontinuada ? `<span class="badge bg-danger ms-2 px-2 py-1" style="font-size: 0.65rem;" title="Esta trilha foi inativada pela empresa."><i class="bi bi-exclamation-triangle-fill"></i> Descontinuado</span>` : '';
+
             return `
             <div class="tree-node shadow-sm mb-4 rounded-3 p-0 ${trilha100Porcento ? 'concluido border-success border-4' : 'border-4'}">
                 <div class="tree-header p-3 d-flex align-items-center bg-white border-bottom rounded-top" onclick="toggleSection(this, '${keyTrilha}')">
@@ -205,7 +209,7 @@
                     <div class="flex-grow-1">
                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">TRILHA</span>
                         ${trilha100Porcento ? '<i class="bi bi-check-circle-fill text-success ms-2"></i>' : ''}
-                        <h5 class="fw-bold mb-0 d-inline-block">${trilha.titulo}</h5>
+                        <h5 class="fw-bold mb-0 d-inline-block">${trilha.titulo} ${badgeTrilhaDesc}</h5>
                         ${badgeData}
                     </div>
                     <div class="text-end">
@@ -229,12 +233,15 @@
                         const isActiveTre = sessoesAbertas.has(keyTreino) ? 'active' : '';
                         const iconTre = sessoesAbertas.has(keyTreino) ? 'bi-chevron-down' : 'bi-chevron-right';
 
+                        // Flag de Descontinuado (Treino)
+                        const badgeTreinoDesc = treino.descontinuada ? `<span class="badge bg-danger ms-2 px-2 py-1" style="font-size: 0.65rem;" title="Este treinamento foi inativado."><i class="bi bi-exclamation-triangle-fill"></i> Descontinuado</span>` : '';
+
                         return `
                         <div class="mb-4 border rounded-3 p-0 bg-light">
                             <div class="treino-header d-flex justify-content-between align-items-center bg-white border-bottom rounded-top" onclick="toggleSection(this, '${keyTreino}')">
                                 <h6 class="fw-bold mb-0 d-flex align-items-center">
                                     <i class="bi ${iconTre} me-2 text-secondary"></i>
-                                    <i class="bi bi-collection-play me-2 text-primary"></i>${treino.titulo}
+                                    <i class="bi bi-collection-play me-2 text-primary"></i>${treino.titulo} ${badgeTreinoDesc}
                                 </h6>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="badge bg-light text-dark border small">${formatarTempo(tempoTreino)}</span>
@@ -253,11 +260,12 @@
                                     const keyTask = `task-${idxTri}-${idxTre}-${idxTa}`;
                                     const isInstActive = sessoesAbertas.has(keyTask) ? 'active' : '';
                                     
-                                    // Bate a Tarefa do JSON com o Banco de Dados
+                                    // Bate a Tarefa do JSON com o Banco de Dados para extrair a descrição
                                     const descBanco = tarefasBd[tarefa.id] ? tarefasBd[tarefa.id].descricao : null;
-                                    
-                                    // Processa a descrição transformando URLs em botões
                                     const descricaoComLinks = linkify(descBanco || tarefa.descricao);
+
+                                    // Flag de Descontinuado (Tarefa)
+                                    const badgeTarefaDesc = tarefa.descontinuada ? `<span class="badge bg-danger ms-2 px-2 py-1" style="font-size: 0.65rem;" title="Esta tarefa foi inativada."><i class="bi bi-exclamation-triangle-fill"></i> Descontinuado</span>` : '';
 
                                     return `
                                     <div class="task-wrapper">
@@ -268,7 +276,7 @@
                                             </div>
                                             
                                             <div class="flex-grow-1 task-title fw-medium d-flex align-items-center">
-                                                ${tarefa.titulo} 
+                                                ${tarefa.titulo} ${badgeTarefaDesc}
                                                 <i class="bi bi-info-circle ms-2 text-muted fs-5 icon-info-task" title="Ver detalhes/links da tarefa" onclick="toggleInstructions(this, '${keyTask}')"></i>
                                             </div>
                                             
@@ -314,7 +322,6 @@
         }
     }
 
-    // Ação principal do Aluno: Marcar/Desmarcar tarefa e salvar no banco
     function toggleTarefa(idxTri, idxTre, idxTa) {
         planoAtivo.estrutura.trilhas[idxTri].treinamentos[idxTre].tarefas[idxTa].concluido = !planoAtivo.estrutura.trilhas[idxTri].treinamentos[idxTre].tarefas[idxTa].concluido;
         
@@ -324,12 +331,13 @@
     }
 
     function salvarProgressoNoBanco() {
-        // Função pronta aguardando o Backend!
+        // Alterado o método de 'POST' para 'PUT' conforme padrão REST e controller
         fetch(`/meus-planos/${planoAtivo.id}/progresso`, {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
                 estrutura: planoAtivo.estrutura

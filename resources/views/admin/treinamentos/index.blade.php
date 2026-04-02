@@ -135,7 +135,7 @@
                             </div>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label fw-bold small text-uppercase">Descrição Curta</label>
+                            <label class="form-label fw-bold small text-uppercase">Descrição</label>
                             <textarea name="descricao" id="descricao" class="form-control" rows="2" maxlength="255"
                                 placeholder="Descreva o objetivo deste treinamento..."></textarea>
                         </div>
@@ -144,8 +144,7 @@
                         {{-- DUAL LIST BOX --}}
                         <div class="row mt-4">
                             <div class="col-md-6 border-end">
-                                <label class="form-label fw-bold text-primary mb-2">Tarefas Disponíveis (Apenas
-                                    Ativas)</label>
+                                <label class="form-label fw-bold text-primary mb-2">Tarefas Disponíveis</label>
                                 <div class="row g-2 mb-3">
                                     <div class="col-md-7"><input type="text" id="filtroNomeTarefa"
                                             class="form-control form-control-sm" placeholder="Buscar tarefa..."
@@ -165,7 +164,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label fw-bold text-success mb-0">Sequência da Jornada <span
+                                    <label class="form-label fw-bold text-success mb-0">Sequência do treinamento <span
                                             class="text-danger">*</span></label>
                                     <div class="d-flex gap-2">
                                         <span class="badge bg-info text-dark" id="tempoTotalModal"><i

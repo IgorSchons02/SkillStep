@@ -16,7 +16,8 @@ return new class extends Migration
                   ->constrained('categorias')
                   ->restrictOnDelete(); // Impede excluir a categoria se tiver tarefas nela
             
-            $table->string('titulo', 100);
+            // Campo de Título agora com a restrição Unique Key (UK)
+            $table->string('titulo', 100)->unique();
             
             // Usamos string longa ou text para garantir que URLs gigantes caibam sem cortar
             $table->text('descricao'); 

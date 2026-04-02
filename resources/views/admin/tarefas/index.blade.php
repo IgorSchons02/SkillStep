@@ -55,12 +55,12 @@
                     <thead class="table-light text-uppercase small fw-bold text-muted">
                         <tr>
                             <th class="ps-4" style="width: 25%">Título da Tarefa</th>
-                            <th style="width: 20%">Link / Conteúdo</th>
+                            <th style="width: 20%">Descrição</th>
                             <th style="width: 15%">Categoria</th>
                             <th style="width: 10%">Tempo</th>
                             <th style="width: 10%">Status</th>
                             <th style="width: 10%">Criado em</th>
-                            <th class="text-end pe-4" style="width: 10%">Ações</th>
+                            <th class="text-end pe-4" style="width: 12%">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -97,6 +97,20 @@
                                 </td>
                                 <td class="text-end pe-4">
                                     <div class="btn-group">
+                                        {{-- Botão Visualizar --}}
+                                        <button type="button" class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal"
+                                            data-bs-target="#modalVisTarefa"
+                                            data-titulo="{{ $tarefa->titulo }}" 
+                                            data-descricao="{{ $tarefa->descricao }}"
+                                            data-tempo="{{ number_format($tarefa->tempo_estimado, 1, ',', '') }}"
+                                            data-categoria="{{ $tarefa->categoria->nome ?? 'Sem categoria' }}" 
+                                            data-categoria-cor="{{ $tarefa->categoria->cor_hex ?? '#6c757d' }}"
+                                            data-status="{{ $tarefa->status }}"
+                                            data-data="{{ \Carbon\Carbon::parse($tarefa->created_at)->format('d/m/Y') }}">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+
+                                        {{-- Botão Editar --}}
                                         <button type="button" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal"
                                             data-bs-target="#modalEditarTarefa"
                                             data-url="{{ route('tarefas.update', $tarefa->id) }}"
@@ -106,6 +120,7 @@
                                             <i class="bi bi-pencil"></i>
                                         </button>
 
+                                        {{-- Botão Excluir --}}
                                         <form action="{{ route('tarefas.destroy', $tarefa->id) }}" method="POST"
                                             class="d-inline form-delete">
                                             @csrf @method('DELETE')
@@ -127,9 +142,47 @@
                     </tbody>
                 </table>
             </div>
-            {{-- Removido o d-flex e adicionado padding px-4 para o Laravel usar seu próprio justify-content-between --}}
             <div class="card-footer bg-white border-top px-4 pt-3 pb-1">
                 {{ $tarefas->withQueryString()->links() }}
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL VISUALIZAR TAREFA --}}
+    <div class="modal fade" id="modalVisTarefa" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-eye me-2"></i>Detalhes da Tarefa</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 p-md-5 bg-light">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h3 class="fw-bold text-dark mb-2" id="vis_titulo"></h3>
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="badge" id="vis_categoria"></span>
+                                <span id="vis_status"></span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-white text-dark border shadow-sm fs-6 px-3 py-2 mb-1">
+                                <i class="bi bi-clock text-primary me-1"></i> <span id="vis_tempo"></span>h
+                            </span>
+                            <div class="text-muted small mt-1">Criado em: <span id="vis_data"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold text-uppercase text-muted small mb-3">Instruções / Descrição</h6>
+                            <div id="vis_descricao" class="lh-base text-dark" style="white-space: pre-wrap;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">Fechar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -186,7 +239,7 @@
                         <div class="mb-0">
                             <label class="form-label fw-bold">Descrição / Instruções <span
                                     class="text-danger">*</span></label>
-                            <textarea name="descricao" class="form-control" rows="3" required
+                            <textarea name="descricao" class="form-control" rows="3" required maxlength="500"
                                 placeholder="Descreva a tarefa. Você pode colar links de vídeos ou materiais aqui..."></textarea>
                         </div>
                     </div>
@@ -316,6 +369,41 @@
 
             document.getElementById('filtroStatus').addEventListener('change', function () {
                 searchForm.submit();
+            });
+
+            // --- Transformar Links em Botões na Modal de Visualização ---
+            function linkifyText(text) {
+                if (!text) return 'Nenhuma descrição detalhada disponível.';
+                
+                // Escapar HTML para evitar XSS, depois converter URLs
+                let escaped = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                return escaped.replace(
+                    /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim,
+                    '<br><a href="$1" target="_blank" class="btn btn-sm btn-outline-primary mt-3 fw-bold"><i class="bi bi-box-arrow-up-right me-1"></i> Acessar Link Externo</a>'
+                );
+            }
+
+            // --- Preencher Modal de Visualização ---
+            const visButtons = document.querySelectorAll('[data-bs-target="#modalVisTarefa"]');
+            visButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.getElementById('vis_titulo').innerText = this.getAttribute('data-titulo');
+                    
+                    const catBadge = document.getElementById('vis_categoria');
+                    catBadge.innerText = this.getAttribute('data-categoria');
+                    catBadge.style.backgroundColor = this.getAttribute('data-categoria-cor');
+
+                    const isAtivo = this.getAttribute('data-status') == '1';
+                    document.getElementById('vis_status').innerHTML = isAtivo 
+                        ? '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Ativo</span>' 
+                        : '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Inativo</span>';
+
+                    document.getElementById('vis_tempo').innerText = this.getAttribute('data-tempo');
+                    document.getElementById('vis_data').innerText = this.getAttribute('data-data');
+
+                    let rawDesc = this.getAttribute('data-descricao');
+                    document.getElementById('vis_descricao').innerHTML = linkifyText(rawDesc);
+                });
             });
 
             // --- Preencher Modal de Edição ---

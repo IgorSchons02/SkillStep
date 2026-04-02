@@ -56,9 +56,11 @@ class TrilhaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nome' => 'required|string|max:100',
+            'nome' => 'required|string|max:100|unique:trilhas,nome',
             'descricao' => 'nullable|string|max:255',
             'treinamentos_sequencia' => 'required|string'
+        ],[
+            'nome.unique' => 'Já existe uma trilha cadastrada com este nome. Escolha outro título.',
         ]);
 
         $trilha = Trilha::create([
@@ -84,9 +86,11 @@ class TrilhaController extends Controller
         $trilha = Trilha::findOrFail($id);
 
         $request->validate([
-            'nome' => 'required|string|max:100',
+            'nome' => 'required|string|max:100|unique:trilhas,nome,' . $id,
             'descricao' => 'nullable|string|max:255',
             'treinamentos_sequencia' => 'required|string'
+        ],[
+            'nome.unique' => 'Já existe uma trilha cadastrada com este nome. Escolha outro título.',
         ]);
 
         $trilha->update([
@@ -111,18 +115,25 @@ class TrilhaController extends Controller
     {
         $trilha = Trilha::findOrFail($id);
 
-        // Lógica futura: impedir exclusão se houver matrículas vinculadas
-        /*
-        if ($trilha->alunos()->exists()) {
-            return redirect()->route('trilhas.index')->with('error', 'Esta trilha possui alunos em andamento e não pode ser apagada.');
-        }
-        */
+        $emUsoNoPlano = false;
 
-        try {
-            $trilha->delete();
-            return redirect()->route('trilhas.index')->with('success', 'Trilha removida permanentemente.');
-        } catch (\Exception $e) {
-            return redirect()->route('trilhas.index')->with('error', 'Erro ao excluir a trilha. Verifique se existem pendências atreladas a ela.');
+        \App\Models\Plano::chunk(100, function ($planos) use ($id, &$emUsoNoPlano) {
+            foreach ($planos as $plano) {
+                $trilhas = $plano->estrutura['trilhas'] ?? [];
+                foreach ($trilhas as $t) {
+                    if (($t['id'] ?? null) == $id) {
+                        $emUsoNoPlano = true;
+                        return false;
+                    }
+                }
+            }
+        });
+
+        if ($emUsoNoPlano) {
+            return back()->with('error', 'Exclusão bloqueada: Esta trilha está ativa dentro do Plano de Estudos de um aluno.');
         }
+
+        $trilha->delete();
+        return redirect()->route('trilhas.index')->with('success', 'Trilha excluída com sucesso!');
     }
 }
