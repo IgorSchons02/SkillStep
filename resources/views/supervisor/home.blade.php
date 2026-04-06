@@ -78,7 +78,7 @@
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-header bg-white border-bottom-0 pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
             <h5 class="fw-bold text-dark mb-0"><i class="bi bi-activity text-primary me-2"></i>Acompanhamento Recente</h5>
-            <a href="{{ route('planos.index') }}" class="btn btn-sm btn-outline-secondary">Ver Todos os Planos</a>
+            <a href="{{ route('meus-alunos.index') }}" class="btn btn-sm btn-outline-secondary">Ver Todos os Alunos</a>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -121,8 +121,9 @@
                                     </div>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <a href="{{ route('meus-planos.show', $plano->id) }}" class="btn btn-sm btn-light border text-primary fw-bold" title="Ver detalhes do progresso">
-                                        <i class="bi bi-eye"></i> Analisar
+                                    {{-- LINK ATUALIZADO COM O PARÂMETRO 'abrir_modal' --}}
+                                    <a href="{{ route('meus-alunos.index', ['abrir_modal' => $plano->id]) }}" class="btn btn-sm btn-light border text-primary fw-bold" title="Abrir painel de acompanhamento">
+                                        <i class="bi bi-box-arrow-up-right"></i> Visualizar
                                     </a>
                                 </td>
                             </tr>

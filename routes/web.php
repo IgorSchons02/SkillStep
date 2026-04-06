@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\TrilhaController;
 use App\Http\Controllers\PlanoController;
+use App\Http\Controllers\MeusAlunosController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Middleware\ValidaPerfil; // <-- Importação do seu novo Middleware
 use Illuminate\Support\Facades\Route;
@@ -57,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
 
     // ── ÁREA COMUM (Acessível por todos os logados) ──
     Route::resource('meus-planos', \App\Http\Controllers\MeusPlanosController::class)->only(['index', 'show']);
-    Route::post('meus-planos/{id}/progresso', [\App\Http\Controllers\MeusPlanosController::class, 'updateProgresso']);
+    Route::put('meus-planos/{id}/progresso', [\App\Http\Controllers\MeusPlanosController::class, 'updateProgresso']);
+    Route::get('/meus-alunos', [MeusAlunosController::class, 'index'])->name('meus-alunos.index');
 
 });

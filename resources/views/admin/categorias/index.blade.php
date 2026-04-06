@@ -103,7 +103,8 @@
                     @csrf
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nome</label>
+                            <label class="form-label fw-bold">Nome<span
+                                        class="text-danger"> *</span></label></label>
                             <input type="text" name="nome" class="form-control" required maxlength="50"
                                 placeholder="Ex: Segurança">
                         </div>
@@ -131,7 +132,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title fw-bold">Editar Categoria</h5>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil me-2"></i> Editar Categoria</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="formEditarCategoria" method="POST">
@@ -199,8 +200,8 @@
                     const form = this.closest('.form-delete');
 
                     Swal.fire({
-                        title: 'Excluir Categoria?',
-                        html: `Você está prestes a remover a categoria <strong>"${categoriaNome}"</strong>.<br><small class="text-muted">Isso pode afetar tarefas vinculadas!</small>`,
+                        title: 'Excluir Categoria?',    
+                        html: `Você está prestes a remover a categoria <strong>"${categoriaNome}"</strong>.`,//<br><small class="text-muted">Isso pode afetar tarefas vinculadas!</small>
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#e85d2f',

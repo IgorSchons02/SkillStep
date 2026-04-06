@@ -74,7 +74,7 @@ class PlanoController extends Controller
             'titulo' => 'required|string|max:150|unique:planos,titulo',
             'usuario_id' => 'required|exists:usuarios,id',
             'estrutura' => 'required|string', // Recebemos como string JSON do front-end
-            'supervisores' => 'required|array'
+            'supervisores' => 'array'
         ],[
             'titulo.unique' => 'Já existe um plano de estudos cadastrado com este título. Escolha outro título.',
         ]);
@@ -104,7 +104,7 @@ class PlanoController extends Controller
             'titulo' => 'required|string|max:150|unique:planos,titulo,' . $id,
             'usuario_id' => 'required|exists:usuarios,id',
             'estrutura' => 'required|string',
-            'supervisores' => 'required|array'
+            'supervisores' => 'array'
         ],[
             'titulo.unique' => 'Já existe um plano de estudos cadastrado com este título. Escolha outro título.',
         ]);

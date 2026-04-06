@@ -67,11 +67,11 @@
                 </li>
             @endif
 
-            {{-- Menu Visível para SUPERVISOR --}}
-            @if(Auth::user()->isSupervisor())
+            {{-- Menu Visível para ADMIN e SUPERVISOR --}}
+            @if(Auth::user()->isAdmin() || Auth::user()->isSupervisor())
                 <hr class="mx-3 my-2 opacity-25 text-white">
-                <li>
-                    <a href="#">
+                <li class="{{ Route::is('meus-alunos.*') ? 'active' : '' }}">
+                    <a href="{{ route('meus-alunos.index') }}">
                         <i class="bi bi-person-video3"></i>
                         <span>Meus Alunos</span>
                     </a>
@@ -79,7 +79,7 @@
             @endif
 
             <hr class="mx-3 my-2 opacity-25 text-white">
-            <li>
+            <li class="{{ Route::is('perfil.*') ? 'active' : '' }}">
                 <a href="{{ route('perfil.index') }}">
                     <i class="bi bi-person"></i>
                     <span>Meu Perfil</span>

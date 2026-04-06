@@ -135,17 +135,20 @@
                     <div class="modal-body p-4">
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Nome Completo</label>
+                                <label class="form-label fw-bold">Nome Completo <span
+                                        class="text-danger">*</span></label></label>
                                 <input type="text" name="nome" class="form-control" required required maxlength="100" placeholder="Ex: Igor Schons">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">CPF</label>
+                                <label class="form-label fw-bold">CPF <span
+                                        class="text-danger">*</span></label></label>
                                 <input type="text" name="cpf" id="cpf_novo" class="form-control cpf-mask" required
                                     pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="000.000.000-00"
                                     title="Digite o CPF completo no formato 000.000.000-00">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Perfil</label>
+                                <label class="form-label fw-bold">Perfil <span
+                                        class="text-danger">*</span></label>
                                 <select name="tipo_usuario" class="form-select" required>
                                     <option value="aluno">Aluno</option>
                                     <option value="supervisor">Supervisor</option>
@@ -153,12 +156,14 @@
                                 </select>
                             </div>
                             <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">E-mail</label>
+                                <label class="form-label fw-bold">E-mail<span
+                                        class="text-danger">*</span></label></label>
                                 <input type="email" name="email" class="form-control" required
                                     placeholder="email@exemplo.com">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Senha Inicial</label>
+                                <label class="form-label fw-bold">Senha Inicial <span
+                                        class="text-danger">*</span></label></label>
                                 <input type="password" name="senha" class="form-control" required minlength="6"
                                     placeholder="Mínimo 6 caracteres"
                                     oninvalid="this.setCustomValidity('A senha deve ter pelo menos 6 caracteres')"
