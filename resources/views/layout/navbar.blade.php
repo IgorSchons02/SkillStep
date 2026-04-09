@@ -78,13 +78,13 @@
                 </li>
             @endif
 
-            <hr class="mx-3 my-2 opacity-25 text-white">
+            <!-- <hr class="mx-3 my-2 opacity-25 text-white">
             <li class="{{ Route::is('perfil.*') ? 'active' : '' }}">
                 <a href="{{ route('perfil.index') }}">
                     <i class="bi bi-person"></i>
                     <span>Meu Perfil</span>
                 </a>
-            </li>
+            </li> -->
         </ul>
     </nav>
 

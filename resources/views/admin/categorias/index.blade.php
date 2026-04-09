@@ -7,7 +7,7 @@
         {{-- Cabeçalho --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-dark">Categorias</h2>
+                <h2 class="fw-bold text-dark"><i class="bi bi-tag-fill text-primary me-2"></i>Categorias</h2>
                 <p class="text-muted mb-0">Organize as tarefas do SkillStep por áreas de conhecimento.</p>
             </div>
             <button type="button" class="btn btn-primary px-4 shadow-sm" data-bs-toggle="modal"

@@ -7,7 +7,7 @@
         {{-- Cabeçalho --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-dark"><i class="bi bi-people-fill text-primary me-2"></i>Meus Alunos</h2>
+                <h2 class="fw-bold text-dark"><i class="bi bi-person-video3 text-primary me-2"></i>Meus Alunos</h2>
                 <p class="text-muted mb-0">Acompanhe o progresso das jornadas de aprendizado dos seus alunos vinculados.</p>
             </div>
         </div>
@@ -42,7 +42,7 @@
 
         {{-- Paginação Nativa do Laravel --}}
         @if ($planos->hasPages())
-            <div class="d-flex justify-content-center mt-4">
+            <div class="card-footer bg-white border-top px-4 pt-3 pb-1">
                 {{ $planos->withQueryString()->links() }}
             </div>
         @endif

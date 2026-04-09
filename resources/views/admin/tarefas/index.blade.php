@@ -7,7 +7,7 @@
         {{-- Cabeçalho --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-dark">Gestão de Tarefas</h2>
+                <h2 class="fw-bold text-dark"><i class="bi bi-list-task text-primary me-2"></i>Gestão de Tarefas</h2>
                 <p class="text-muted mb-0">Organize os materiais e atividades para a montagem dos treinamentos.</p>
             </div>
             <button type="button" class="btn btn-primary px-4 shadow-sm fw-bold" data-bs-toggle="modal"

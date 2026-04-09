@@ -7,7 +7,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-dark">Usuários</h2>
+                <h2 class="fw-bold text-dark"><i class="bi bi-people text-primary me-2"></i>Usuários</h2>
                 <p class="text-muted mb-0">Gerenciamento de acessos e perfis do sistema SkillStep.</p>
             </div>
             <button type="button" class="btn btn-primary px-4 shadow-sm" data-bs-toggle="modal"

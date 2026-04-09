@@ -33,7 +33,34 @@ class HomeController extends Controller
      */
     public function homeAdmin()
     {
-        return view('admin.home');
+        // 1. Busca todos os planos apenas para calcular os totalizadores (Cards)
+        $todosPlanos = \App\Models\Plano::all();
+
+        $totalPlanos = $todosPlanos->count();
+        $planosConcluidos = $todosPlanos->where('progresso', 100)->count();
+        $planosEmAndamento = $totalPlanos - $planosConcluidos;
+
+        // 2. Métricas Globais de Usuários e Inventário
+        $totalAlunos = \App\Models\Usuario::where('tipo_usuario', 'aluno')->count();
+        $totalSupervisores = \App\Models\Usuario::where('tipo_usuario', 'supervisor')->count();
+        $totalTrilhas = \App\Models\Trilha::count();
+        $totalTreinamentos = \App\Models\Treinamento::count();
+        $totalTarefas = \App\Models\Tarefa::count();
+
+        // 3. Busca a lista para a Tabela, ordenando do mais novo pro mais antigo e paginando de 10 em 10
+        $planosAcompanhamento = \App\Models\Plano::with('aluno')->latest()->paginate(10);
+
+        return view('admin.home', compact(
+            'totalPlanos',
+            'planosConcluidos',
+            'planosEmAndamento',
+            'totalAlunos',
+            'totalSupervisores',
+            'totalTrilhas',
+            'totalTreinamentos',
+            'totalTarefas',
+            'planosAcompanhamento'
+        ));
     }
 
     /**
@@ -42,12 +69,15 @@ class HomeController extends Controller
      */
     public function homeSupervisor()
     {
-        // 1. O ID do supervisor logado (convertido para string, pois muitas vezes os selects múltiplos guardam as IDs como strings no JSON)
-        $idSupervisor = (string) \Illuminate\Support\Facades\Auth::id();
+        $user = Auth::user();
 
-        // 2. Busca todos os planos onde este supervisor está alocado, trazendo também os dados do aluno
+        // 1 & 2. Busca todos os planos onde este supervisor está alocado, trazendo também os dados do aluno.
+        // APLICADO O AJUSTE DE SEGURANÇA DE TIPAGEM JSON (Evita painel vazio)
         $planos = \App\Models\Plano::with('aluno')
-            ->whereJsonContains('supervisores_ids', $idSupervisor)
+            ->where(function ($q) use ($user) {
+                $q->whereJsonContains('supervisores_ids', $user->id)
+                    ->orWhereJsonContains('supervisores_ids', (string) $user->id);
+            })
             ->get();
 
         // 3. Calcula as métricas globais para os cards
@@ -58,8 +88,8 @@ class HomeController extends Controller
         // 4. Conta quantos alunos distintos este supervisor acompanha
         $totalAlunos = $planos->pluck('usuario_id')->unique()->count();
 
-        // 5. Separa os planos mais recentes ou em andamento para a tabela de acompanhamento rápido
-        $planosAcompanhamento = $planos->sortByDesc('updated_at')->take(8);
+        // 5. AJUSTADO: Pega exatamente 5 planos, ordenados pela criação mais recente
+        $planosAcompanhamento = $planos->sortByDesc('created_at')->take(5);
 
         return view('supervisor.home', compact('totalPlanos', 'planosConcluidos', 'planosEmAndamento', 'totalAlunos', 'planosAcompanhamento'));
     }
@@ -93,5 +123,4 @@ class HomeController extends Controller
 
         return view('aluno.home', compact('totalPlanos', 'planosConcluidos', 'planosEmAndamento', 'supervisores'));
     }
-
 }

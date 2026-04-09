@@ -52,7 +52,7 @@
         {{-- Grid de Planos gerada pelo JavaScript --}}
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4" id="gridPlanos"></div>
 
-        <div class="d-flex justify-content-center mt-4">
+        <div class="card-footer bg-white border-top px-4 pt-3 pb-1">
             {{ $planos->withQueryString()->links() }}
         </div>
     </div>
@@ -170,15 +170,23 @@
                 <div class="modal-body p-4">
                     <div id="infoPlanoVis" class="mb-4">
                         <h4 class="fw-bold mb-1" id="visTitulo"></h4>
-                        <p class="text-muted mb-0"><i class="bi bi-person me-1"></i> Aluno: <span id="visAluno"></span></p>
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between small mb-1">
-                                <span>Progresso Geral</span>
-                                <span class="fw-bold" id="visPercent">0%</span>
+                        <p class="text-muted mb-0"><i class="bi bi-person me-1"></i> Aluno: <span id="visAluno" class="fw-bold text-dark"></span></p>
+                        
+                        <div class="mt-4 p-3 bg-light rounded border">
+                            <div class="row align-items-center mb-2">
+                                <div class="col-6">
+                                    <span class="small text-muted fw-bold text-uppercase">Carga Horária Estimada</span><br>
+                                    <span class="fw-bold fs-5 text-primary" id="visCargaHoraria"><i class="bi bi-clock me-1"></i>0h</span>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span class="small text-muted fw-bold text-uppercase">Progresso Geral</span><br>
+                                    <span class="fw-bold fs-5" id="visPercent">0%</span>
+                                </div>
                             </div>
                             <div class="progress" style="height: 10px;" id="visProgressContainer"></div>
                         </div>
                     </div>
+                    
                     <label class="form-label fw-bold small text-uppercase text-muted">Estrutura de Aprendizado</label>
                     <div class="tree-container" id="treeViewContainerVis"></div>
                 </div>
@@ -649,8 +657,13 @@
             document.getElementById("visPercent").innerText = p.progresso + "%";
             document.getElementById("visProgressContainer").innerHTML = `<div class="progress-bar ${p.progresso === 100 ? 'bg-success' : 'bg-primary'}" style="width: ${p.progresso}%"></div>`;
 
-            const container = document.getElementById("treeViewContainerVis");
             const estrutura = p.estrutura || { trilhas: [] };
+            
+            // Calculamos o progresso total para exibir na modal
+            const progressoCalc = calcularProgressoTempo(estrutura);
+            document.getElementById("visCargaHoraria").innerHTML = `<i class="bi bi-clock me-1"></i>${formatarTempoVisual(progressoCalc.total)}`;
+
+            const container = document.getElementById("treeViewContainerVis");
 
             container.innerHTML = estrutura.trilhas.map((trilha) => {
                 let badgeDataVis = '';
