@@ -24,3 +24,7 @@ Homestead.yaml
 Thumbs.db
 /bootstrap/cache/*.php
 !/bootstrap/cache/.gitignore
+# Cypress
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
