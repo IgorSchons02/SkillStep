@@ -81,8 +81,23 @@
                                     </span>
                                 </td>
                                 <td>
+                                    {{-- LÓGICA DE CONVERSÃO DE TEMPO ADICIONADA AQUI --}}
+                                    @php
+                                        $tempoDecimal = $tarefa->tempo_estimado;
+                                        $horas = floor($tempoDecimal);
+                                        $minutos = round(($tempoDecimal - $horas) * 60);
+                                        
+                                        $tempoFormatado = '';
+                                        if ($horas > 0 && $minutos > 0) {
+                                            $tempoFormatado = "{$horas}h {$minutos}m";
+                                        } elseif ($horas > 0) {
+                                            $tempoFormatado = "{$horas}h";
+                                        } else {
+                                            $tempoFormatado = "{$minutos}m";
+                                        }
+                                    @endphp
                                     <span class="fw-bold text-muted">
-                                        <i class="bi bi-clock me-1"></i>{{ number_format($tarefa->tempo_estimado, 1, ',', '') }}h
+                                        <i class="bi bi-clock me-1"></i>{{ $tempoFormatado }}
                                     </span>
                                 </td>
                                 <td>
@@ -102,7 +117,7 @@
                                             data-bs-target="#modalVisTarefa"
                                             data-titulo="{{ $tarefa->titulo }}" 
                                             data-descricao="{{ $tarefa->descricao }}"
-                                            data-tempo="{{ number_format($tarefa->tempo_estimado, 1, ',', '') }}"
+                                            data-tempo="{{ $tempoFormatado }}" {{-- Passando a string já formatada aqui também --}}
                                             data-categoria="{{ $tarefa->categoria->nome ?? 'Sem categoria' }}" 
                                             data-categoria-cor="{{ $tarefa->categoria->cor_hex ?? '#6c757d' }}"
                                             data-status="{{ $tarefa->status }}"
@@ -115,7 +130,7 @@
                                             data-bs-target="#modalEditarTarefa"
                                             data-url="{{ route('tarefas.update', $tarefa->id) }}"
                                             data-titulo="{{ $tarefa->titulo }}" data-descricao="{{ $tarefa->descricao }}"
-                                            data-tempo="{{ $tarefa->tempo_estimado }}"
+                                            data-tempo="{{ $tarefa->tempo_estimado }}" {{-- O editar continua com o decimal para o input number --}}
                                             data-categoria="{{ $tarefa->categoria_id }}" data-status="{{ $tarefa->status }}">
                                             <i class="bi bi-pencil"></i>
                                         </button>
@@ -167,7 +182,7 @@
                         </div>
                         <div class="text-end">
                             <span class="badge bg-white text-dark border shadow-sm fs-6 px-3 py-2 mb-1">
-                                <i class="bi bi-clock text-primary me-1"></i> <span id="vis_tempo"></span>h
+                                <i class="bi bi-clock text-primary me-1"></i> <span id="vis_tempo"></span>
                             </span>
                             <div class="text-muted small mt-1">Criado em: <span id="vis_data"></span></div>
                         </div>
@@ -231,9 +246,9 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-clock"></i></span>
                                     <input type="number" name="tempo_estimado" class="form-control" required min="0.1"
-                                        step="0.1" placeholder="Ex: 1.5">
+                                        step="0.1" placeholder="Ex: 1,5">
                                 </div>
-                                <small class="text-muted">Use ponto para decimais (Ex: 0.5 = 30min)</small>
+                                <small class="text-muted">Use vírgula para decimais (Ex: 0,5 = 30min)</small>
                             </div>
                         </div>
                         <div class="mb-0">
@@ -299,6 +314,7 @@
                                     <input type="number" id="edit_tempo" name="tempo_estimado" class="form-control" required
                                         min="0.1" step="0.1">
                                 </div>
+                                <small class="text-muted">Use vírgula para decimais (Ex: 0,5 = 30min)</small>
                             </div>
                         </div>
                         <div class="mb-0">
@@ -432,7 +448,7 @@
 
                     Swal.fire({
                         title: 'Excluir Tarefa?',
-                        html: `Deseja realmente remover <strong>"${tituloTarefa}"</strong>?<br><small class="text-danger mt-2 d-block">Atenção: Se esta tarefa estiver em algum treinamento, ela não poderá ser excluída.</small>`,
+                        html: `Deseja realmente remover <strong>"${tituloTarefa}"</strong>?<br><small class="text-danger mt-2 d-block">Atenção: Se esta tarefa estiver em algum treinamento ou plano de estudos, ela não poderá ser excluída.</small>`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#dc3545',

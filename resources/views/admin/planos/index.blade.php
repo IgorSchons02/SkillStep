@@ -52,7 +52,7 @@
         {{-- Grid de Planos gerada pelo JavaScript --}}
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4" id="gridPlanos"></div>
 
-        <div class="card-footer bg-white border-top px-4 pt-3 pb-1">
+        <div class="border-top px-4 pt-3 pb-1">
             {{ $planos->withQueryString()->links() }}
         </div>
     </div>
@@ -170,13 +170,15 @@
                 <div class="modal-body p-4">
                     <div id="infoPlanoVis" class="mb-4">
                         <h4 class="fw-bold mb-1" id="visTitulo"></h4>
-                        <p class="text-muted mb-0"><i class="bi bi-person me-1"></i> Aluno: <span id="visAluno" class="fw-bold text-dark"></span></p>
-                        
+                        <p class="text-muted mb-0"><i class="bi bi-person me-1"></i> Aluno: <span id="visAluno"
+                                class="fw-bold text-dark"></span></p>
+
                         <div class="mt-4 p-3 bg-light rounded border">
                             <div class="row align-items-center mb-2">
                                 <div class="col-6">
                                     <span class="small text-muted fw-bold text-uppercase">Carga Horária Estimada</span><br>
-                                    <span class="fw-bold fs-5 text-primary" id="visCargaHoraria"><i class="bi bi-clock me-1"></i>0h</span>
+                                    <span class="fw-bold fs-5 text-primary" id="visCargaHoraria"><i
+                                            class="bi bi-clock me-1"></i>0h</span>
                                 </div>
                                 <div class="col-6 text-end">
                                     <span class="small text-muted fw-bold text-uppercase">Progresso Geral</span><br>
@@ -186,7 +188,7 @@
                             <div class="progress" style="height: 10px;" id="visProgressContainer"></div>
                         </div>
                     </div>
-                    
+
                     <label class="form-label fw-bold small text-uppercase text-muted">Estrutura de Aprendizado</label>
                     <div class="tree-container" id="treeViewContainerVis"></div>
                 </div>
@@ -258,7 +260,7 @@
                     confirmButtonColor: '#e85d2f'
                 });
             @endif
-            });
+                });
 
         function formatarTempoVisual(horasDecimal) {
             if (!horasDecimal) return '0h';
@@ -359,19 +361,19 @@
                     const badgeTrilha = isTrilhaDesc ? `<span class="badge bg-danger ms-2 px-2 py-1" style="font-size: 0.65rem;" title="Esta trilha foi inativada no sistema."><i class="bi bi-exclamation-triangle-fill"></i> Descontinuado</span>` : '';
 
                     return `
-                        <div class="tree-node border rounded mb-3 bg-white shadow-sm" data-id="${idxT}">
-                            <div class="tree-header" onclick="toggleTree(this)">
-                                <i class="bi bi-grip-vertical drag-handle fs-5"></i>
-                                <i class="bi bi-chevron-down me-2 text-primary"></i>
-                                <span class="badge badge-trilha me-2">TRILHA</span>
-                                <strong class="flex-grow-1 ${trilha.concluido ? 'item-concluido' : ''}">${trilha.titulo} ${badgeTrilha}</strong>
-                                ${badgeData}
-                                <span class="badge badge-tempo me-2"><i class="bi bi-clock me-1"></i>${formatarTempoVisual(tTri)}</span>
-                                <button type="button" class="btn btn-add-tree btn-outline-primary shadow-sm" onclick="abrirBusca('treino', ${idxT}, event)"><i class="bi bi-plus"></i> Treinamento</button>
-                                ${btnExcluirTrilha}
-                            </div>
-                            <div class="tree-content active p-2" id="treinos-container-${idxT}">
-                                ${(trilha.treinamentos || []).map((treino, idxTr) => {
+                            <div class="tree-node border rounded mb-3 bg-white shadow-sm" data-id="${idxT}">
+                                <div class="tree-header" onclick="toggleTree(this)">
+                                    <i class="bi bi-grip-vertical drag-handle fs-5"></i>
+                                    <i class="bi bi-chevron-down me-2 text-primary"></i>
+                                    <span class="badge badge-trilha me-2">TRILHA</span>
+                                    <strong class="flex-grow-1 ${trilha.concluido ? 'item-concluido' : ''}">${trilha.titulo} ${badgeTrilha}</strong>
+                                    ${badgeData}
+                                    <span class="badge badge-tempo me-2"><i class="bi bi-clock me-1"></i>${formatarTempoVisual(tTri)}</span>
+                                    <button type="button" class="btn btn-add-tree btn-outline-primary shadow-sm" onclick="abrirBusca('treino', ${idxT}, event)"><i class="bi bi-plus"></i> Treinamento</button>
+                                    ${btnExcluirTrilha}
+                                </div>
+                                <div class="tree-content active p-2" id="treinos-container-${idxT}">
+                                    ${(trilha.treinamentos || []).map((treino, idxTr) => {
                         const tTre = treino.tarefas ? treino.tarefas.reduce((s, t) => s + parseFloat(t.tempo_estimado || 0), 0) : 0;
                         const btnExcluirTreino = !treino.concluido ? `<button type="button" class="btn btn-sm text-danger ms-2 p-1" onclick="removerItem('treino', ${idxT}, event, ${idxTr})"><i class="bi bi-x-lg"></i></button>` : '<i class="bi bi-lock-fill text-muted ms-3"></i>';
 
@@ -381,18 +383,18 @@
                         const badgeTreino = isTreinoDesc ? `<span class="badge bg-danger ms-2 px-2 py-1" style="font-size: 0.65rem;" title="Este treinamento foi inativado no sistema."><i class="bi bi-exclamation-triangle-fill"></i> Descontinuado</span>` : '';
 
                         return `
-                                    <div class="tree-item" data-id="${idxTr}">
-                                        <div class="tree-header border-0 bg-transparent" onclick="toggleTree(this)">
-                                            <i class="bi bi-grip-vertical drag-handle text-muted"></i>
-                                            <i class="bi bi-chevron-down me-2 text-primary"></i>
-                                            <span class="badge badge-treino me-2">Treinamento</span>
-                                            <span class="flex-grow-1 ${treino.concluido ? 'item-concluido' : 'fw-bold text-dark'}">${treino.titulo} ${badgeTreino}</span>
-                                            <span class="badge badge-tempo me-2"><i class="bi bi-clock me-1"></i>${formatarTempoVisual(tTre)}</span>
-                                            <button type="button" class="btn btn-add-tree btn-outline-secondary shadow-sm" onclick="abrirBusca('tarefa', ${idxT}, event, ${idxTr})"><i class="bi bi-plus"></i> Tarefa</button>
-                                            ${btnExcluirTreino}
-                                        </div>
-                                        <div class="tree-content active ms-4" id="tarefas-container-${idxT}-${idxTr}">
-                                            ${(treino.tarefas || []).map((tarefa, idxTa) => {
+                                        <div class="tree-item" data-id="${idxTr}">
+                                            <div class="tree-header border-0 bg-transparent" onclick="toggleTree(this)">
+                                                <i class="bi bi-grip-vertical drag-handle text-muted"></i>
+                                                <i class="bi bi-chevron-down me-2 text-primary"></i>
+                                                <span class="badge badge-treino me-2">Treinamento</span>
+                                                <span class="flex-grow-1 ${treino.concluido ? 'item-concluido' : 'fw-bold text-dark'}">${treino.titulo} ${badgeTreino}</span>
+                                                <span class="badge badge-tempo me-2"><i class="bi bi-clock me-1"></i>${formatarTempoVisual(tTre)}</span>
+                                                <button type="button" class="btn btn-add-tree btn-outline-secondary shadow-sm" onclick="abrirBusca('tarefa', ${idxT}, event, ${idxTr})"><i class="bi bi-plus"></i> Tarefa</button>
+                                                ${btnExcluirTreino}
+                                            </div>
+                                            <div class="tree-content active ms-4" id="tarefas-container-${idxT}-${idxTr}">
+                                                ${(treino.tarefas || []).map((tarefa, idxTa) => {
 
                             // Validação de Status (Tarefa)
                             const tBase = db.tarefas.find(t => t.id == tarefa.id);
@@ -401,22 +403,22 @@
 
                             const btnExcluirTarefa = !tarefa.concluido ? `<button type="button" class="btn btn-sm text-danger p-0 ms-2" onclick="removerItem('tarefa', ${idxT}, event, ${idxTr}, ${idxTa})"><i class="bi bi-dash-circle"></i></button>` : '<i class="bi bi-lock-fill text-muted ms-2"></i>';
                             return `
-                                                <div class="tree-item py-1 d-flex justify-content-between pe-3 border-bottom border-light align-items-center" data-id="${idxTa}">
-                                                    <div class="d-flex align-items-center flex-grow-1">
-                                                        <i class="bi bi-grip-vertical drag-handle text-muted small me-2"></i>
-                                                        <span class="${tarefa.concluido ? 'item-concluido' : 'text-secondary'}"><i class="bi ${tarefa.concluido ? 'bi-check-circle-fill text-success' : 'bi-circle'} me-2"></i>${tarefa.titulo} ${badgeDesc}</span>
-                                                    </div>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="badge badge-tempo">${formatarTempoVisual(tarefa.tempo_estimado)}</span>
-                                                        ${btnExcluirTarefa}
-                                                    </div>
-                                                </div>`;
+                                                    <div class="tree-item py-1 d-flex justify-content-between pe-3 border-bottom border-light align-items-center" data-id="${idxTa}">
+                                                        <div class="d-flex align-items-center flex-grow-1">
+                                                            <i class="bi bi-grip-vertical drag-handle text-muted small me-2"></i>
+                                                            <span class="${tarefa.concluido ? 'item-concluido' : 'text-secondary'}"><i class="bi ${tarefa.concluido ? 'bi-check-circle-fill text-success' : 'bi-circle'} me-2"></i>${tarefa.titulo} ${badgeDesc}</span>
+                                                        </div>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge badge-tempo">${formatarTempoVisual(tarefa.tempo_estimado)}</span>
+                                                            ${btnExcluirTarefa}
+                                                        </div>
+                                                    </div>`;
                         }).join("")}
-                                        </div>
-                                    </div>`;
+                                            </div>
+                                        </div>`;
                     }).join("")}
-                            </div>
-                        </div>`;
+                                </div>
+                            </div>`;
                 }).join("");
 
                 Sortable.create(document.getElementById('treeViewContainer'), {
@@ -492,10 +494,10 @@
 
         function renderListaBusca(itens) {
             document.getElementById("listaBuscaItens").innerHTML = itens.map(i => `
-                    <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3" onclick="confirmarAdicao(${i.id})">
-                        <span class="fw-bold text-dark">${i.titulo}</span> 
-                        <span class="badge bg-primary rounded-pill"><i class="bi bi-plus fs-6"></i> Adicionar</span>
-                    </button>`).join("") || `<div class="p-4 text-center text-muted">Nenhum item ativo encontrado.</div>`;
+                        <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3" onclick="confirmarAdicao(${i.id})">
+                            <span class="fw-bold text-dark">${i.titulo}</span> 
+                            <span class="badge bg-primary rounded-pill"><i class="bi bi-plus fs-6"></i> Adicionar</span>
+                        </button>`).join("") || `<div class="p-4 text-center text-muted">Nenhum item ativo encontrado.</div>`;
         }
 
         function filtrarListaBusca() {
@@ -602,36 +604,36 @@
                 const dataCriacao = new Date(p.created_at).toLocaleDateString('pt-BR');
 
                 return `
-                    <div class="col">
-                        <div class="card h-100 shadow-sm card-plano border-0 border-top border-4 ${p.progresso === 100 ? 'border-success' : 'border-primary'}">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <span class="badge ${p.progresso === 100 ? 'bg-success' : 'bg-primary-subtle text-primary border border-primary-subtle px-3 py-2'}">${p.progresso === 100 ? 'Concluído' : 'Em Andamento'}</span>
-                                    <small class="text-muted"><i class="bi bi-calendar-event me-1"></i>${dataCriacao}</small>
-                                </div>
-                                <h5 class="fw-bold mb-1 text-dark">${p.titulo}</h5>
-                                <p class="text-muted small mb-1"><i class="bi bi-person-circle me-1"></i><strong>Aluno:</strong> ${nomeAluno}</p>
-                                <p class="text-muted small mb-3 text-truncate" title="${supervisoresNomes}"><i class="bi bi-eye me-1"></i><strong>Supervisores:</strong> ${supervisoresNomes}</p>
+                        <div class="col">
+                            <div class="card h-100 shadow-sm card-plano border-0 border-top border-4 ${p.progresso === 100 ? 'border-success' : 'border-primary'}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span class="badge ${p.progresso === 100 ? 'bg-success' : 'bg-primary-subtle text-primary border border-primary-subtle px-3 py-2'}">${p.progresso === 100 ? 'Concluído' : 'Em Andamento'}</span>
+                                        <small class="text-muted"><i class="bi bi-calendar-event me-1"></i>${dataCriacao}</small>
+                                    </div>
+                                    <h5 class="fw-bold mb-1 text-dark">${p.titulo}</h5>
+                                    <p class="text-muted small mb-1"><i class="bi bi-person-circle me-1"></i><strong>Aluno:</strong> ${nomeAluno}</p>
+                                    <p class="text-muted small mb-3 text-truncate" title="${supervisoresNomes}"><i class="bi bi-eye me-1"></i><strong>Supervisores:</strong> ${supervisoresNomes}</p>
 
-                                <div class="d-flex justify-content-between small mb-1 mt-4">
-                                    <span class="text-muted fw-bold">Progresso</span>
-                                    <span class="fw-bold ${p.progresso === 100 ? 'text-success' : 'text-primary'}">${p.progresso}%</span>
+                                    <div class="d-flex justify-content-between small mb-1 mt-4">
+                                        <span class="text-muted fw-bold">Progresso</span>
+                                        <span class="fw-bold ${p.progresso === 100 ? 'text-success' : 'text-primary'}">${p.progresso}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar ${p.progresso === 100 ? 'bg-success' : 'bg-primary'}" style="width: ${p.progresso}%"></div>
+                                    </div>
                                 </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar ${p.progresso === 100 ? 'bg-success' : 'bg-primary'}" style="width: ${p.progresso}%"></div>
+                                <div class="card-footer bg-transparent border-0 pb-3 pt-0 d-flex gap-2">
+                                    <button class="btn btn-light border fw-bold px-3" onclick="visualizarPlano(${p.id})"><i class="bi bi-eye"></i></button>
+                                    <button class="btn btn-outline-primary fw-bold w-100" onclick="editarPlano(${p.id})"><i class="bi bi-pencil me-1"></i> Editar Plano</button>
+
+                                    <form action="/admin/planos/${p.id}" method="POST" class="d-inline form-delete">
+                                        @csrf @method('DELETE')
+                                        <button type="button" class="btn btn-outline-danger btn-delete px-3"><i class="bi bi-trash"></i></button>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="card-footer bg-transparent border-0 pb-3 pt-0 d-flex gap-2">
-                                <button class="btn btn-light border fw-bold px-3" onclick="visualizarPlano(${p.id})"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-outline-primary fw-bold w-100" onclick="editarPlano(${p.id})"><i class="bi bi-pencil me-1"></i> Editar Plano</button>
-
-                                <form action="/admin/planos/${p.id}" method="POST" class="d-inline form-delete">
-                                    @csrf @method('DELETE')
-                                    <button type="button" class="btn btn-outline-danger btn-delete px-3"><i class="bi bi-trash"></i></button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>`;
+                        </div>`;
             }).join("") || '<div class="col-12 py-5 text-center text-muted py-5 bg-white rounded border shadow-sm"><i class="bi bi-person-workspace fs-1 text-muted mb-3"></i><br>Nenhum plano encontrado.</div>';
 
             document.querySelectorAll('.btn-delete').forEach(button => {
@@ -658,7 +660,7 @@
             document.getElementById("visProgressContainer").innerHTML = `<div class="progress-bar ${p.progresso === 100 ? 'bg-success' : 'bg-primary'}" style="width: ${p.progresso}%"></div>`;
 
             const estrutura = p.estrutura || { trilhas: [] };
-            
+
             // Calculamos o progresso total para exibir na modal
             const progressoCalc = calcularProgressoTempo(estrutura);
             document.getElementById("visCargaHoraria").innerHTML = `<i class="bi bi-clock me-1"></i>${formatarTempoVisual(progressoCalc.total)}`;
@@ -678,16 +680,16 @@
                 const badgeTrilhaVis = isTrilhaDesc ? `<span class="badge bg-danger ms-2 px-2 py-1" style="font-size: 0.65rem;" title="Esta trilha foi inativada no sistema."><i class="bi bi-exclamation-triangle-fill"></i> Descontinuado</span>` : '';
 
                 return `
-                    <div class="tree-node border rounded mb-2 bg-light shadow-sm">
-                        <div class="tree-header" onclick="toggleTree(this)">
-                            <i class="bi bi-chevron-down me-2"></i>
-                            <span class="badge badge-trilha me-2">TRILHA</span>
-                            <strong class="flex-grow-1 ${trilha.concluido ? 'text-success' : ''}">${trilha.titulo} ${badgeTrilhaVis}</strong>
-                            ${badgeDataVis}
-                            ${trilha.concluido ? '<i class="bi bi-check-circle-fill text-success ms-2"></i>' : ''}
-                        </div>
-                        <div class="tree-content active p-2 ms-3">
-                            ${(trilha.treinamentos || []).map((treino) => {
+                        <div class="tree-node border rounded mb-2 bg-light shadow-sm">
+                            <div class="tree-header" onclick="toggleTree(this)">
+                                <i class="bi bi-chevron-down me-2"></i>
+                                <span class="badge badge-trilha me-2">TRILHA</span>
+                                <strong class="flex-grow-1 ${trilha.concluido ? 'text-success' : ''}">${trilha.titulo} ${badgeTrilhaVis}</strong>
+                                ${badgeDataVis}
+                                ${trilha.concluido ? '<i class="bi bi-check-circle-fill text-success ms-2"></i>' : ''}
+                            </div>
+                            <div class="tree-content active p-2 ms-3">
+                                ${(trilha.treinamentos || []).map((treino) => {
 
                     // Validação de Status (Treinamento na Modal de Visualização)
                     const treBase = db.treinamentos.find(t => t.id == treino.id);
@@ -695,15 +697,15 @@
                     const badgeTreinoVis = isTreinoDesc ? `<span class="badge bg-danger ms-2 px-2 py-1" style="font-size: 0.65rem;" title="Este treinamento foi inativado no sistema."><i class="bi bi-exclamation-triangle-fill"></i> Descontinuado</span>` : '';
 
                     return `
-                                <div class="tree-item">
-                                    <div class="tree-header" onclick="toggleTree(this)">
-                                        <i class="bi bi-chevron-down me-2"></i>
-                                        <span class="badge badge-treino me-2">TREINAMENTO</span>
-                                        <span class="flex-grow-1 ${treino.concluido ? 'text-success fw-bold' : ''}">${treino.titulo} ${badgeTreinoVis}</span>
-                                        ${treino.concluido ? '<i class="bi bi-check-circle-fill text-success ms-2"></i>' : ''}
-                                    </div>
-                                    <div class="tree-content active ms-3">
-                                        ${(treino.tarefas || []).map((tarefa) => {
+                                    <div class="tree-item">
+                                        <div class="tree-header" onclick="toggleTree(this)">
+                                            <i class="bi bi-chevron-down me-2"></i>
+                                            <span class="badge badge-treino me-2">TREINAMENTO</span>
+                                            <span class="flex-grow-1 ${treino.concluido ? 'text-success fw-bold' : ''}">${treino.titulo} ${badgeTreinoVis}</span>
+                                            ${treino.concluido ? '<i class="bi bi-check-circle-fill text-success ms-2"></i>' : ''}
+                                        </div>
+                                        <div class="tree-content active ms-3">
+                                            ${(treino.tarefas || []).map((tarefa) => {
 
                         // Validação de Status (Tarefa na Modal de Visualização)
                         const tBase = db.tarefas.find(t => t.id == tarefa.id);
@@ -711,19 +713,19 @@
                         const badgeDesc = isDescontinuada ? `<span class="badge bg-danger ms-2 px-2 py-1" style="font-size: 0.65rem;" title="Esta tarefa foi inativada no sistema."><i class="bi bi-exclamation-triangle-fill"></i> Descontinuado</span>` : '';
 
                         return `
-                                            <div class="py-1 small d-flex justify-content-between pe-3 border-bottom border-light">
-                                                <span class="${tarefa.concluido ? 'text-success' : 'text-muted'}">
-                                                    <i class="bi ${tarefa.concluido ? 'bi-check-lg' : 'bi-circle'} me-1"></i> ${tarefa.titulo} ${badgeDesc}
-                                                </span>
-                                                <span class="badge badge-tempo">${formatarTempoVisual(tarefa.tempo_estimado)}</span>
-                                            </div>
-                                            `;
+                                                <div class="py-1 small d-flex justify-content-between pe-3 border-bottom border-light">
+                                                    <span class="${tarefa.concluido ? 'text-success' : 'text-muted'}">
+                                                        <i class="bi ${tarefa.concluido ? 'bi-check-lg' : 'bi-circle'} me-1"></i> ${tarefa.titulo} ${badgeDesc}
+                                                    </span>
+                                                    <span class="badge badge-tempo">${formatarTempoVisual(tarefa.tempo_estimado)}</span>
+                                                </div>
+                                                `;
                     }).join("")}
+                                        </div>
                                     </div>
-                                </div>
-                            `}).join("")}
-                        </div>
-                    </div>`;
+                                `}).join("")}
+                            </div>
+                        </div>`;
             }).join("") || '<div class="text-center text-muted p-3">Nenhum conteúdo.</div>';
 
             bootstrapModalVis.show();

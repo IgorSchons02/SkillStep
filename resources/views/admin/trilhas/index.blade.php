@@ -51,6 +51,18 @@
                     foreach ($treinamentosAtivos as $treinamento) {
                         $cargaHoraria += $treinamento->tarefas->where('status', 1)->sum('tempo_estimado');
                     }
+
+                    // Formatação do tempo
+                    $horasGrid = floor($cargaHoraria);
+                    $minutosGrid = round(($cargaHoraria - $horasGrid) * 60);
+                    $tempoFormatadoGrid = '';
+                    if ($horasGrid > 0 && $minutosGrid > 0) {
+                        $tempoFormatadoGrid = "{$horasGrid}h {$minutosGrid}m";
+                    } elseif ($horasGrid > 0) {
+                        $tempoFormatadoGrid = "{$horasGrid}h";
+                    } else {
+                        $tempoFormatadoGrid = "{$minutosGrid}m";
+                    }
                 @endphp
                 <div class="col">
                     <div class="card h-100 shadow-sm border card-trilha">
@@ -59,7 +71,7 @@
                                 <div class="d-flex gap-1">
                                     <span class="badge bg-primary">{{ $treinamentosAtivos->count() }} Treinamentos</span>
                                     <span class="badge bg-info text-dark"><i class="bi bi-clock"></i>
-                                        {{ number_format($cargaHoraria, 1, ',', '') }}h</span>
+                                        {{ $tempoFormatadoGrid }}</span>
                                 </div>
                                 <span
                                     class="badge {{ $trilha->status ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} border">
@@ -238,7 +250,6 @@
 
     <script>
         // === DADOS RECEBIDOS DO BACKEND ===
-        // O backend já deve enviar os treinamentos com uma propriedade extra calculada: carga_horaria (soma das tarefas ativas)
         const treinamentosDisponiveisDB = @json($treinamentosDisponiveis);
         const trilhasDB = @json($trilhas->items());
 
@@ -247,6 +258,16 @@
         let sortableInstance = null;
 
         const bootstrapModalConfig = new bootstrap.Modal(document.getElementById('modalTrilha'));
+
+        // Função utilitária para converter decimal em formato visual (ex: 1.5 -> 1h 30m)
+        function formatarTempoVisual(horasDecimal) {
+            if (!horasDecimal) return '0h';
+            const h = Math.floor(horasDecimal);
+            const m = Math.round((horasDecimal - h) * 60);
+            if (h === 0) return `${m}m`;
+            if (m === 0) return `${h}h`;
+            return `${h}h ${m}m`;
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             const searchForm = document.getElementById('searchForm');
@@ -291,7 +312,7 @@
                 prepararNovaTrilha();
                 bootstrapModalConfig.show();
             @endif
-                                });
+                                        });
 
         function prepararNovaTrilha() {
             document.getElementById("formTrilha").reset();
@@ -348,13 +369,13 @@
 
             listaDisp.innerHTML = disponiveis.map(t => {
                 return `
-                                        <button type="button" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" onclick="adicionar(${t.id})">
-                                            <div class="d-flex align-items-center text-start overflow-hidden pe-2">
-                                                <i class="bi bi-plus-circle-fill text-primary me-2"></i>
-                                                <strong class="me-2 text-truncate" title="${t.nome}">${t.nome}</strong>
-                                            </div>
-                                            <span class="badge bg-light text-muted border flex-shrink-0">${t.carga_horaria}h</span>
-                                        </button>`;
+                                                <button type="button" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" onclick="adicionar(${t.id})">
+                                                    <div class="d-flex align-items-center text-start overflow-hidden pe-2">
+                                                        <i class="bi bi-plus-circle-fill text-primary me-2"></i>
+                                                        <strong class="me-2 text-truncate" title="${t.nome}">${t.nome}</strong>
+                                                    </div>
+                                                    <span class="badge bg-light text-muted border flex-shrink-0">${formatarTempoVisual(t.carga_horaria)}</span>
+                                                </button>`;
             }).join("") || '<div class="text-center p-4 text-muted small">Nenhum treinamento encontrado.</div>';
 
             // COLUNA DA DIREITA
@@ -373,21 +394,21 @@
                     const dragIcon = isTrilhaEmUso ? '' : '<i class="bi bi-grip-vertical text-muted me-1 drag-handle cursor-grab fs-5 flex-shrink-0"></i>';
 
                     htmlSelecionadas += `
-                                            <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-2 border-0 border-bottom bg-transparent" data-id="${t.id}">
-                                                <div class="d-flex align-items-center overflow-hidden pe-2 w-100">
-                                                    ${dragIcon}
-                                                    <span class="step-number">${validCount}</span>
-                                                    <strong class="me-2 text-truncate" title="${t.nome}">${t.nome}</strong> 
-                                                    <small class="text-muted text-nowrap">(${t.carga_horaria}h)</small>
-                                                </div>
-                                                ${btnRemover}
-                                            </div>`;
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-2 border-0 border-bottom bg-transparent" data-id="${t.id}">
+                                                        <div class="d-flex align-items-center overflow-hidden pe-2 w-100">
+                                                            ${dragIcon}
+                                                            <span class="step-number">${validCount}</span>
+                                                            <strong class="me-2 text-truncate" title="${t.nome}">${t.nome}</strong> 
+                                                            <small class="text-muted text-nowrap">(${formatarTempoVisual(t.carga_horaria)})</small>
+                                                        </div>
+                                                        ${btnRemover}
+                                                    </div>`;
                 }
             });
 
             listaSel.innerHTML = htmlSelecionadas || '<div class="text-center mt-5 text-muted small"><i class="bi bi-arrow-left-circle mb-2 d-block fs-3"></i>Clique nos treinamentos ao lado para montar a trilha.</div>';
 
-            document.getElementById("tempoTotalModal").innerHTML = `<i class="bi bi-clock me-1"></i> ${calcularCargaHorariaTotal(selecionadasID).toFixed(1)}h`;
+            document.getElementById("tempoTotalModal").innerHTML = `<i class="bi bi-clock me-1"></i> ${formatarTempoVisual(calcularCargaHorariaTotal(selecionadasID))}`;
             document.getElementById("countSelecionadas").innerText = validCount;
 
             inicializarDragAndDrop();
@@ -471,7 +492,7 @@
                 cargaHorariaObj += tarefasAtivas.reduce((acc, tf) => acc + parseFloat(tf.tempo_estimado), 0);
             });
 
-            document.getElementById("viewTempoTotalTrilha").innerText = cargaHorariaObj.toFixed(1) + 'h';
+            document.getElementById("viewTempoTotalTrilha").innerText = formatarTempoVisual(cargaHorariaObj);
 
             const listaView = document.getElementById("viewListaTreinamentos");
             listaView.innerHTML = treinamentosAtivos.map((treinoRel, idx) => {
@@ -481,13 +502,13 @@
                 const tempoDesseTreino = tarefasDesseTreino.reduce((acc, tf) => acc + parseFloat(tf.tempo_estimado), 0);
 
                 return `
-                                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                          <div class="d-flex align-items-center overflow-hidden pe-3">
-                                            <span class="step-number">${idx + 1}</span>
-                                            <strong class="me-2 text-truncate" title="${treinoRel.nome}">${treinoRel.nome}</strong>
-                                          </div>
-                                          <span class="badge bg-light text-muted border flex-shrink-0"><i class="bi bi-clock me-1"></i>${tempoDesseTreino.toFixed(1)}h</span>
-                                        </div>`;
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                                  <div class="d-flex align-items-center overflow-hidden pe-3">
+                                                    <span class="step-number">${idx + 1}</span>
+                                                    <strong class="me-2 text-truncate" title="${treinoRel.nome}">${treinoRel.nome}</strong>
+                                                  </div>
+                                                  <span class="badge bg-light text-muted border flex-shrink-0"><i class="bi bi-clock me-1"></i>${formatarTempoVisual(tempoDesseTreino)}</span>
+                                                </div>`;
             }).join("") || '<div class="text-center p-3 text-muted">Nenhum treinamento ativo associado a esta trilha.</div>';
 
             new bootstrap.Modal(document.getElementById('modalVisualizarTrilha')).show();

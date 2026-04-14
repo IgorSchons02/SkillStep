@@ -12,7 +12,7 @@
             </div>
             <button type="button" class="btn btn-primary px-4 shadow-sm" data-bs-toggle="modal"
                 data-bs-target="#modalNovaCategoria">
-                <i class="bi bi-tag-fill me-2"></i>Nova Categoria
+                <i class="bi bi-plus-lg me-2"></i>Nova Categoria
             </button>
         </div>
 
@@ -103,8 +103,7 @@
                     @csrf
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nome<span
-                                        class="text-danger"> *</span></label></label>
+                            <label class="form-label fw-bold">Nome<span class="text-danger"> *</span></label></label>
                             <input type="text" name="nome" class="form-control" required maxlength="50"
                                 placeholder="Ex: Segurança">
                         </div>
@@ -200,7 +199,7 @@
                     const form = this.closest('.form-delete');
 
                     Swal.fire({
-                        title: 'Excluir Categoria?',    
+                        title: 'Excluir Categoria?',
                         html: `Você está prestes a remover a categoria <strong>"${categoriaNome}"</strong>.`,//<br><small class="text-muted">Isso pode afetar tarefas vinculadas!</small>
                         icon: 'warning',
                         showCancelButton: true,
@@ -215,6 +214,6 @@
                     });
                 });
             });
-    });
+        });
     </script>
 @endpush

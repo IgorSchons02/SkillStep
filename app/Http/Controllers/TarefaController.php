@@ -41,7 +41,7 @@ class TarefaController extends Controller
             'tempo_estimado' => 'required|numeric|min:0.1',
             'descricao' => 'required|string|max:2000', // Aceita qualquer texto até 2000 caracteres
             'status' => 'boolean'
-        ],[
+        ], [
             'titulo.unique' => 'Já existe uma tarefa cadastrada com este título. Escolha outro nome.',
         ]);
         // Se o checkbox vier vazio do HTML, garantimos que seja false
@@ -62,7 +62,7 @@ class TarefaController extends Controller
             'tempo_estimado' => 'required|numeric|min:0.1',
             'descricao' => 'required|string|max:2000', // Aceita qualquer texto até 2000 caracteres
             'status' => 'boolean'
-        ],[
+        ], [
             'titulo.unique' => 'Já existe uma tarefa cadastrada com este título. Escolha outro nome.',
         ]);
 
@@ -95,7 +95,7 @@ class TarefaController extends Controller
     {
         $tarefa = Tarefa::findOrFail($id);
 
-        // 1. Validação Relacional (Se você ainda usa a tabela pivô para templates base)
+        //1. Validação Relacional (Se você ainda usa a tabela pivô para templates base)
         if ($tarefa->treinamentos()->exists()) {
             return back()->with('error', 'Não é possível excluir. A tarefa pertence a um treinamento.');
         }
@@ -120,7 +120,7 @@ class TarefaController extends Controller
         });
 
         if ($emUsoNoPlano) {
-            return back()->with('error', 'Exclusão bloqueada: Esta tarefa está vinculada dentro do Plano de Estudos de um aluno.');
+            return back()->with('error', 'Exclusão bloqueada: Esta tarefa está vinculada dentro do plano de estudos de um aluno.');
         }
 
         $tarefa->delete();

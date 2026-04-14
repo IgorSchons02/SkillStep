@@ -44,7 +44,7 @@ class TreinamentoController extends Controller
             'nome' => 'required|string|max:100|unique:treinamentos,nome',
             'descricao' => 'nullable|string|max:255',
             'tarefas_sequencia' => 'required|string' // O JSON que vem do Front-end
-        ],[
+        ], [
             'nome.unique' => 'Já existe um treinamento cadastrado com este nome. Escolha outro título.',
         ]);
 
@@ -77,7 +77,7 @@ class TreinamentoController extends Controller
             'nome' => 'required|string|max:100|unique:treinamentos,nome,' . $id,
             'descricao' => 'nullable|string|max:255',
             'tarefas_sequencia' => 'required|string'
-        ],[
+        ], [
             'nome.unique' => 'Já existe um treinamento cadastrado com este nome. Escolha outro título.',
         ]);
 

@@ -44,6 +44,20 @@
                 @php
                     // Filtramos apenas as tarefas ativas para não quebrar os totalizadores da Grid
                     $tarefasAtivas = $treinamento->tarefas->where('status', 1)->values();
+
+                    // Cálculo do tempo em horas e minutos
+                    $tempoDecimalGrid = $tarefasAtivas->sum('tempo_estimado');
+                    $horasGrid = floor($tempoDecimalGrid);
+                    $minutosGrid = round(($tempoDecimalGrid - $horasGrid) * 60);
+                    $tempoFormatadoGrid = '';
+
+                    if ($horasGrid > 0 && $minutosGrid > 0) {
+                        $tempoFormatadoGrid = "{$horasGrid}h {$minutosGrid}m";
+                    } elseif ($horasGrid > 0) {
+                        $tempoFormatadoGrid = "{$horasGrid}h";
+                    } else {
+                        $tempoFormatadoGrid = "{$minutosGrid}m";
+                    }
                 @endphp
                 <div class="col">
                     <div class="card h-100 shadow-sm border card-treinamento">
@@ -52,7 +66,7 @@
                                 <div class="d-flex gap-1">
                                     <span class="badge bg-primary">{{ $tarefasAtivas->count() }} Tarefas</span>
                                     <span class="badge bg-info text-dark"><i class="bi bi-clock"></i>
-                                        {{ number_format($tarefasAtivas->sum('tempo_estimado'), 1, ',', '') }}h</span>
+                                        {{ $tempoFormatadoGrid }}</span>
                                 </div>
                                 <span
                                     class="badge {{ $treinamento->status ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} border">
@@ -248,6 +262,16 @@
 
         const bootstrapModalConfig = new bootstrap.Modal(document.getElementById('modalTreinamento'));
 
+        // Função utilitária para converter decimal em formato h m
+        function formatarTempoVisual(horasDecimal) {
+            if (!horasDecimal) return '0h';
+            const h = Math.floor(horasDecimal);
+            const m = Math.round((horasDecimal - h) * 60);
+            if (h === 0) return `${m}m`;
+            if (m === 0) return `${h}h`;
+            return `${h}h ${m}m`;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const searchForm = document.getElementById('searchForm');
             let timeout = null;
@@ -274,7 +298,7 @@
 
                     Swal.fire({
                         title: 'Excluir Treinamento?',
-                        html: `Deseja realmente remover <strong>"${titulo}"</strong>?<br><small class="text-danger mt-2 d-block">Atenção: Você não poderá excluir se ele estiver vinculado a uma trilha de aprendizagem.</small>`,
+                        html: `Deseja realmente remover <strong>"${titulo}"</strong>?<br><small class="text-danger mt-2 d-block">Atenção: Você não poderá excluir se ele estiver vinculado a um plano de estudos ou treinamento.</small>`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#dc3545',
@@ -353,14 +377,14 @@
                 const catBadgeCor = t.categoria ? t.categoria.cor_hex : '#6c757d';
                 const catNome = t.categoria ? t.categoria.nome : 'Geral';
                 return `
-                                <button type="button" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" onclick="adicionar(${t.id})">
-                                    <div class="d-flex align-items-center text-start overflow-hidden pe-2">
-                                        <i class="bi bi-plus-circle-fill text-primary me-2"></i>
-                                        <strong class="me-2 text-truncate" title="${t.titulo}">${t.titulo}</strong>
-                                        <span class="badge flex-shrink-0" style="background-color: ${catBadgeCor}; font-size: 0.65rem;">${catNome}</span>
-                                    </div>
-                                    <span class="badge bg-light text-muted border flex-shrink-0">${t.tempo_estimado}h</span>
-                                </button>`;
+                                                <button type="button" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" onclick="adicionar(${t.id})">
+                                                    <div class="d-flex align-items-center text-start overflow-hidden pe-2">
+                                                        <i class="bi bi-plus-circle-fill text-primary me-2"></i>
+                                                        <strong class="me-2 text-truncate" title="${t.titulo}">${t.titulo}</strong>
+                                                        <span class="badge flex-shrink-0" style="background-color: ${catBadgeCor}; font-size: 0.65rem;">${catNome}</span>
+                                                    </div>
+                                                    <span class="badge bg-light text-muted border flex-shrink-0">${formatarTempoVisual(t.tempo_estimado)}</span>
+                                                </button>`;
             }).join("") || '<div class="text-center p-4 text-muted small">Nenhuma tarefa encontrada com os filtros atuais.</div>';
 
             // COLUNA DA DIREITA (CORREÇÃO DE CONTAGEM AQUI)
@@ -382,22 +406,22 @@
                     const dragIcon = isTreinamentoEmTrilha ? '' : '<i class="bi bi-grip-vertical text-muted me-1 drag-handle cursor-grab fs-5 flex-shrink-0"></i>';
 
                     htmlSelecionadas += `
-                                    <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-2 border-0 border-bottom bg-transparent" data-id="${t.id}">
-                                        <div class="d-flex align-items-center overflow-hidden pe-2 w-100">
-                                            ${dragIcon}
-                                            <span class="step-number">${validCount}</span>
-                                            <strong class="me-2 text-truncate" title="${t.titulo}">${t.titulo}</strong> 
-                                            <span class="badge me-2 flex-shrink-0" style="background-color: ${catBadgeCor}; font-size: 0.65rem;">${catNome}</span>
-                                            <small class="text-muted text-nowrap">(${t.tempo_estimado}h)</small>
-                                        </div>
-                                        ${btnRemover}
-                                    </div>`;
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-2 border-0 border-bottom bg-transparent" data-id="${t.id}">
+                                                        <div class="d-flex align-items-center overflow-hidden pe-2 w-100">
+                                                            ${dragIcon}
+                                                            <span class="step-number">${validCount}</span>
+                                                            <strong class="me-2 text-truncate" title="${t.titulo}">${t.titulo}</strong> 
+                                                            <span class="badge me-2 flex-shrink-0" style="background-color: ${catBadgeCor}; font-size: 0.65rem;">${catNome}</span>
+                                                            <small class="text-muted text-nowrap">(${formatarTempoVisual(t.tempo_estimado)})</small>
+                                                        </div>
+                                                        ${btnRemover}
+                                                    </div>`;
                 }
             });
 
             listaSel.innerHTML = htmlSelecionadas || '<div class="text-center mt-5 text-muted small"><i class="bi bi-arrow-left-circle mb-2 d-block fs-3"></i>Clique nas tarefas ao lado para montar a jornada.</div>';
 
-            document.getElementById("tempoTotalModal").innerHTML = `<i class="bi bi-clock me-1"></i> ${calcularTempoTotal(selecionadasID).toFixed(1)}h`;
+            document.getElementById("tempoTotalModal").innerHTML = `<i class="bi bi-clock me-1"></i> ${formatarTempoVisual(calcularTempoTotal(selecionadasID))}`;
             document.getElementById("countSelecionadas").innerText = validCount;
 
             inicializarDragAndDrop();
@@ -479,7 +503,7 @@
             document.getElementById("viewTotalTarefas").innerText = tarefasAtivas.length;
 
             const tempoTotalObj = tarefasAtivas.reduce((acc, t_relacionamento) => acc + parseFloat(t_relacionamento.tempo_estimado), 0);
-            document.getElementById("viewTempoTotal").innerText = tempoTotalObj.toFixed(1) + 'h';
+            document.getElementById("viewTempoTotal").innerText = formatarTempoVisual(tempoTotalObj);
 
             const listaView = document.getElementById("viewListaTarefas");
             listaView.innerHTML = tarefasAtivas.map((tarefaRel, idx) => {
@@ -487,14 +511,14 @@
                 const catCor = tarefaRel.categoria ? tarefaRel.categoria.cor_hex : '#6c757d';
 
                 return `
-                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                  <div class="d-flex align-items-center overflow-hidden pe-3">
-                                    <span class="step-number">${idx + 1}</span>
-                                    <strong class="me-2 text-truncate" title="${tarefaRel.titulo}">${tarefaRel.titulo}</strong>
-                                    <span class="badge flex-shrink-0" style="background-color: ${catCor}; font-size: 0.65rem;">${catNome}</span>
-                                  </div>
-                                  <span class="text-muted fw-bold text-nowrap"><i class="bi bi-clock me-1"></i>${tarefaRel.tempo_estimado}h</span>
-                                </div>`;
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                                  <div class="d-flex align-items-center overflow-hidden pe-3">
+                                                    <span class="step-number">${idx + 1}</span>
+                                                    <strong class="me-2 text-truncate" title="${tarefaRel.titulo}">${tarefaRel.titulo}</strong>
+                                                    <span class="badge flex-shrink-0" style="background-color: ${catCor}; font-size: 0.65rem;">${catNome}</span>
+                                                  </div>
+                                                  <span class="text-muted fw-bold text-nowrap"><i class="bi bi-clock me-1"></i>${formatarTempoVisual(tarefaRel.tempo_estimado)}</span>
+                                                </div>`;
             }).join("") || '<div class="text-center p-3 text-muted">Nenhuma tarefa ativa associada a este treinamento.</div>';
 
             new bootstrap.Modal(document.getElementById('modalVisualizarTreinamento')).show();
