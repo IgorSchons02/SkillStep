@@ -233,7 +233,7 @@
                             <div class="h5 fw-bold" id="viewTotalTarefas">0</div>
                         </div>
                         <div class="col-6 text-end">
-                            <span class="view-label">Tempo Estimado Ativo</span>
+                            <span class="view-label">Tempo Estimado</span>
                             <div class="h5 fw-bold text-primary" id="viewTempoTotal">0h</div>
                         </div>
                     </div>
@@ -315,7 +315,7 @@
                 prepararNovoTreinamento();
                 bootstrapModalConfig.show();
             @endif
-                        });
+                            });
 
         function prepararNovoTreinamento() {
             document.getElementById("formTreinamento").reset();
@@ -377,14 +377,14 @@
                 const catBadgeCor = t.categoria ? t.categoria.cor_hex : '#6c757d';
                 const catNome = t.categoria ? t.categoria.nome : 'Geral';
                 return `
-                                                <button type="button" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" onclick="adicionar(${t.id})">
-                                                    <div class="d-flex align-items-center text-start overflow-hidden pe-2">
-                                                        <i class="bi bi-plus-circle-fill text-primary me-2"></i>
-                                                        <strong class="me-2 text-truncate" title="${t.titulo}">${t.titulo}</strong>
-                                                        <span class="badge flex-shrink-0" style="background-color: ${catBadgeCor}; font-size: 0.65rem;">${catNome}</span>
-                                                    </div>
-                                                    <span class="badge bg-light text-muted border flex-shrink-0">${formatarTempoVisual(t.tempo_estimado)}</span>
-                                                </button>`;
+                                                    <button type="button" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" onclick="adicionar(${t.id})">
+                                                        <div class="d-flex align-items-center text-start overflow-hidden pe-2">
+                                                            <i class="bi bi-plus-circle-fill text-primary me-2"></i>
+                                                            <strong class="me-2 text-truncate" title="${t.titulo}">${t.titulo}</strong>
+                                                            <span class="badge flex-shrink-0" style="background-color: ${catBadgeCor}; font-size: 0.65rem;">${catNome}</span>
+                                                        </div>
+                                                        <span class="badge bg-light text-muted border flex-shrink-0">${formatarTempoVisual(t.tempo_estimado)}</span>
+                                                    </button>`;
             }).join("") || '<div class="text-center p-4 text-muted small">Nenhuma tarefa encontrada com os filtros atuais.</div>';
 
             // COLUNA DA DIREITA (CORREÇÃO DE CONTAGEM AQUI)
@@ -406,16 +406,16 @@
                     const dragIcon = isTreinamentoEmTrilha ? '' : '<i class="bi bi-grip-vertical text-muted me-1 drag-handle cursor-grab fs-5 flex-shrink-0"></i>';
 
                     htmlSelecionadas += `
-                                                    <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-2 border-0 border-bottom bg-transparent" data-id="${t.id}">
-                                                        <div class="d-flex align-items-center overflow-hidden pe-2 w-100">
-                                                            ${dragIcon}
-                                                            <span class="step-number">${validCount}</span>
-                                                            <strong class="me-2 text-truncate" title="${t.titulo}">${t.titulo}</strong> 
-                                                            <span class="badge me-2 flex-shrink-0" style="background-color: ${catBadgeCor}; font-size: 0.65rem;">${catNome}</span>
-                                                            <small class="text-muted text-nowrap">(${formatarTempoVisual(t.tempo_estimado)})</small>
-                                                        </div>
-                                                        ${btnRemover}
-                                                    </div>`;
+                                                        <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-2 border-0 border-bottom bg-transparent" data-id="${t.id}">
+                                                            <div class="d-flex align-items-center overflow-hidden pe-2 w-100">
+                                                                ${dragIcon}
+                                                                <span class="step-number">${validCount}</span>
+                                                                <strong class="me-2 text-truncate" title="${t.titulo}">${t.titulo}</strong> 
+                                                                <span class="badge me-2 flex-shrink-0" style="background-color: ${catBadgeCor}; font-size: 0.65rem;">${catNome}</span>
+                                                                <small class="text-muted text-nowrap">(${formatarTempoVisual(t.tempo_estimado)})</small>
+                                                            </div>
+                                                            ${btnRemover}
+                                                        </div>`;
                 }
             });
 
@@ -511,14 +511,14 @@
                 const catCor = tarefaRel.categoria ? tarefaRel.categoria.cor_hex : '#6c757d';
 
                 return `
-                                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                                  <div class="d-flex align-items-center overflow-hidden pe-3">
-                                                    <span class="step-number">${idx + 1}</span>
-                                                    <strong class="me-2 text-truncate" title="${tarefaRel.titulo}">${tarefaRel.titulo}</strong>
-                                                    <span class="badge flex-shrink-0" style="background-color: ${catCor}; font-size: 0.65rem;">${catNome}</span>
-                                                  </div>
-                                                  <span class="text-muted fw-bold text-nowrap"><i class="bi bi-clock me-1"></i>${formatarTempoVisual(tarefaRel.tempo_estimado)}</span>
-                                                </div>`;
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                                      <div class="d-flex align-items-center overflow-hidden pe-3">
+                                                        <span class="step-number">${idx + 1}</span>
+                                                        <strong class="me-2 text-truncate" title="${tarefaRel.titulo}">${tarefaRel.titulo}</strong>
+                                                        <span class="badge flex-shrink-0" style="background-color: ${catCor}; font-size: 0.65rem;">${catNome}</span>
+                                                      </div>
+                                                      <span class="text-muted fw-bold text-nowrap"><i class="bi bi-clock me-1"></i>${formatarTempoVisual(tarefaRel.tempo_estimado)}</span>
+                                                    </div>`;
             }).join("") || '<div class="text-center p-3 text-muted">Nenhuma tarefa ativa associada a este treinamento.</div>';
 
             new bootstrap.Modal(document.getElementById('modalVisualizarTreinamento')).show();

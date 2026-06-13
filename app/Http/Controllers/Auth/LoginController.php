@@ -26,25 +26,34 @@ class LoginController extends Controller
     /**
      * Método de autenticação
      */
-public function autenticar(Request $request)
-{
-    $credenciais = $request->validate([
-        'email' => 'required|email',
-        'senha' => 'required', // O Laravel espera o nome 'password', mas vamos ajustar abaixo
-    ]);
+    public function autenticar(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'senha' => 'required',
+        ]);
 
-    // O Laravel nativamente procura por 'password'. Como sua coluna é 'senha':
-    $usuario = Usuario::where('email', $request->email)->first();
+        // Busca o usuário pelo e-mail
+        $usuario = Usuario::where('email', $request->email)->first();
 
-    if ($usuario && Hash::check($request->senha, $usuario->senha)) {
-        Auth::login($usuario);
-        $request->session()->regenerate(); // Segurança extra
+        // 1. Verifica se o usuário existe e se a senha informada é válida
+        if ($usuario && Hash::check($request->senha, $usuario->senha)) {
 
-        return $this->redirecionarPorTipo($usuario);
+            // 2. Verifica se o usuário está ativo (status == 1 ou true)
+            if (!$usuario->status) {
+                return back()->with('error', 'Sua conta está inativa. Por favor, entre em contato com o administrador.');
+            }
+
+            // 3. Realiza o login e regenera a sessão
+            Auth::login($usuario);
+            $request->session()->regenerate();
+
+            return $this->redirecionarPorTipo($usuario);
+        }
+
+        // Caso o e-mail não exista ou a senha esteja incorreta
+        return back()->with('error', 'E-mail ou senha inválidos.');
     }
-
-    return back()->with('error', 'E-mail ou senha inválidos.');
-}
 
     /**
      * Helper interno para centralizar a lógica de redirecionamento
@@ -72,7 +81,7 @@ public function autenticar(Request $request)
         Auth::logout();
         session()->invalidate();
         session()->regenerateToken();
-        
+
         return redirect()->route('login');
     }
 }
