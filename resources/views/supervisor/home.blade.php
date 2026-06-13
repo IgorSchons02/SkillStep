@@ -12,7 +12,7 @@
                     {{-- Pega apenas o primeiro nome do usuário para uma saudação mais amigável --}}
                     <h2 class="fw-bold mb-2">Olá, {{ explode(' ', Auth::user()->nome)[0] }}!</h2>
                     <p class="fs-5 text-light opacity-75 mb-0">Acompanhe o desenvolvimento dos seus alunos em tempo real.
-                        da empresa.</p>
+                    </p>
                 </div>
                 {{-- Ícone do foguete com a cor laranja em destaque --}}
                 <div class="d-none d-md-block">
